@@ -6,6 +6,8 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import AdBlockerPlugin from 'puppeteer-extra-plugin-adblocker';
 puppeteer.use(StealthPlugin());
 
+import { characters } from './charactersUMVC3';
+
 (async () => {
 
     const browser = await puppeteer.launch({ headless: false });
@@ -20,8 +22,15 @@ puppeteer.use(StealthPlugin());
         return element;
     }
 
+    await waitThenClick('tp-yt-paper-button#expand');
 
+    const matchups = await page.$$eval('span.yt-core-attributed-string--link-inherit-color', matchups => {
+        return matchups.map(matchup => matchup.textContent);
+    })
 
+    const filteredMatchups = matchups.filter((element, index) => {
+        return element.includes('vs') && index < 20 || element.includes('vs.') && index < 20;
+    });
 
     // await browser.close();
 })();
