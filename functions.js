@@ -1,6 +1,7 @@
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import AdBlockerPlugin from 'puppeteer-extra-plugin-adblocker';
+import { scrollPageToBottom } from "puppeteer-autoscroll-down";
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdBlockerPlugin());
 
@@ -83,7 +84,7 @@ export const tallyCharactersUsedMarvel = (htmlElementArray) => {
     return charactersInTop8;
 }
 
-export const scrapeCharactersUsed = async (videoUrlList) => {
+export const scrapeCharactersUsed = async (videoUrlList, tallyFunction) => {
 
     const browser = await puppeteer.launch({ headless: false });
 
@@ -110,7 +111,7 @@ export const scrapeCharactersUsed = async (videoUrlList) => {
         // extracting this code to an external function
         // tallyCharactersUsedMarvel
 
-        const charactersInTop8 = tallyCharactersUsedMarvel(descriptionArray);
+        const charactersInTop8 = tallyFunction(descriptionArray);
 
         // example object for storing data about a given tournament top 8
 
@@ -132,4 +133,33 @@ export const scrapeCharactersUsed = async (videoUrlList) => {
 
     return tourneyDataList;
 };
+
+export const getVideoURLs = async () => {
+    const browser = await puppeteer.launch({ headless: false });
+
+    const tourneyVideoURLs = [];
+
+    const page = await browser.newPage();
+    await page.goto('https://www.youtube.com/@TampaNeverSleeps/search?query=umvc3%20top%208');
+
+    let isLoadingAvailable = true // Your condition-to-stop
+
+    while (isLoadingAvailable) {
+        await scrollPageToBottom(page, { size: 500 })
+        await page.waitForResponse(
+            response => response.url() === 'https://www.youtube.com/@TampaNeverSleeps/search?query=umvc3%20top%208' && response.status() === 200
+        )
+        isLoadingAvailable = false // Update your condition-to-stop value
+    }
+
+    const videoThumbnails = await page.$$('a#thumbnail');
+    const propertyJsHandles = await Promise.all(
+        videoThumbnails.map(handle => handle.getProperty('href'))
+    );
+    const hrefs = await Promise.all(
+        propertyJsHandles.map(handle => handle.jsonValue())
+    );
+
+    console.log(hrefs);
+}
 
