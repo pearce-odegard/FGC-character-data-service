@@ -11,10 +11,16 @@ const videoList = [
     'https://youtu.be/fIu2ZYEuAts',
     'https://youtu.be/5FpaXA3M4K4',
     'https://youtu.be/c9TM_AkchVo',
-    'https://youtu.be/OY-SS6mixLo'
+    'https://youtu.be/OY-SS6mixLo',
+    'https://youtu.be/XZixDSpT2Tc',
+    'https://youtu.be/XCAardxpXQ8',
+    'https://youtu.be/O9iXrGPGhV8',
+    'https://youtu.be/yT6JGkcd2dA',
+    'https://youtu.be/cW9WoCvD6Tk',
+    'https://youtu.be/Wy8dQtDamVw',
+    'https://youtu.be/fio48o3zgvE',
+    'https://youtu.be/CXafeOqPbeg'
 ];
 
-for (const video of videoList) {
-    const currentTourneyData = await scrapeCharactersUsed(video);
-    console.log(currentTourneyData);
-}
+const videoCharacterData = await scrapeCharactersUsed(videoList);
+console.log(videoCharacterData);
