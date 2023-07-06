@@ -7,62 +7,11 @@ puppeteer.use(AdBlockerPlugin());
 
 
 
-export const tallyCharactersUsedMarvel = (htmlElementArray) => {
-    const characters = [
-        "Akuma",
-        "Amaterasu",
-        "Arthur",
-        "C.Viper",
-        "Chris",
-        "Chun-Li",
-        "Dante",
-        "Felicia",
-        "Firebrand",
-        "Frank",
-        "Haggar",
-        "Hsien-Ko",
-        "Jill",
-        "Morrigan",
-        "Nemesis",
-        "Wright",
-        "Ryu",
-        "Spencer",
-        "Strider",
-        "Trish",
-        "Tron",
-        "Vergil",
-        "Viewtiful",
-        "Wesker",
-        "Zero",
-        "Captain",
-        "Deadpool",
-        "Doom",
-        "Strange",
-        "Dormammu",
-        "Ghost",
-        "Hawkeye",
-        "Hulk",
-        "Fist",
-        "Man",
-        "Magneto",
-        "MODOK",
-        "Nova",
-        "Phoenix",
-        "Rocket",
-        "Sentinel",
-        "She-Hulk",
-        "Shuma-Gorath",
-        "Spider",
-        "Storm",
-        "Skrull",
-        "Taskmaster",
-        "Thor",
-        "Wolverine",
-        "X-23"
-    ]
+export const tallyCharactersUsed = (htmlElementArray, characters) => {
+
 
     const filteredMatchups = htmlElementArray.filter((element, index) => {
-        return element.includes('vs') || element.includes('vs.');
+        return element.includes('vs');
     });
 
     const charactersInTop8 = {};
@@ -84,7 +33,8 @@ export const tallyCharactersUsedMarvel = (htmlElementArray) => {
     return charactersInTop8;
 }
 
-export const scrapeCharactersUsed = async (videoUrlList, tallyFunction) => {
+
+export const scrapeCharactersUsed = async (videoUrlList, tallyFunction, characterLists, determineGameTitleFunction) => {
 
     const browser = await puppeteer.launch({ headless: false });
 
@@ -92,6 +42,7 @@ export const scrapeCharactersUsed = async (videoUrlList, tallyFunction) => {
 
     for (const videoUrl of videoUrlList) {
         const page = await browser.newPage();
+
         await page.goto(videoUrl);
 
         const waitThenClick = async (selector, clicks = 1) => {
@@ -103,6 +54,27 @@ export const scrapeCharactersUsed = async (videoUrlList, tallyFunction) => {
 
         await waitThenClick('tp-yt-paper-button#expand');
 
+        const titleString = await page.$eval('#title > h1 > yt-formatted-string', title => title.textContent);
+
+        const gameTitle = determineGameTitleFunction(titleString);
+
+        if (gameTitle === 'Video not applicable!') {
+            await page.close();
+            continue;
+        }
+
+        const dateString = await page.$eval('yt-formatted-string#info', info => info.children[2].textContent);
+
+        // example object for storing data about a given tournament top 8
+
+        const currentTourneyData = {
+            title: titleString,
+            game: gameTitle,
+            dateString: dateString,
+            date: new Date(dateString).getTime(),
+            url: videoUrl
+        }
+
         const descriptionArray = await page.$$eval('span.yt-core-attributed-string--link-inherit-color', spans => {
             // the slice method eliminates pesky line breaks
             return spans.map(span => span.textContent.slice(0, -2));
@@ -111,20 +83,11 @@ export const scrapeCharactersUsed = async (videoUrlList, tallyFunction) => {
         // extracting this code to an external function
         // tallyCharactersUsedMarvel
 
-        const charactersInTop8 = tallyFunction(descriptionArray);
+        let charactersInTop8 = tallyFunction(descriptionArray, characterLists[gameTitle]);
 
-        // example object for storing data about a given tournament top 8
+        currentTourneyData.charactersUsed = charactersInTop8;
 
-        const dateString = await page.$eval('yt-formatted-string#info', info => info.children[2].textContent)
-        const titleString = await page.$eval('#title > h1 > yt-formatted-string', title => title.textContent);
-
-        const currentTourneyData = {
-            title: titleString,
-            dateString: dateString,
-            date: new Date(dateString).getTime(),
-            url: videoUrl,
-            charactersUsed: charactersInTop8
-        }
+        console.log(currentTourneyData);
 
         tourneyDataList.push(currentTourneyData);
 
@@ -140,14 +103,14 @@ export const getVideoURLs = async () => {
     const browser = await puppeteer.launch({ headless: false });
 
     const page = await browser.newPage();
-    await page.goto('https://www.youtube.com/@TampaNeverSleeps/search?query=umvc3%20top%208');
+    await page.goto('https://www.youtube.com/@TampaNeverSleeps/search?query=top%208');
 
     let shouldKeepScrolling = true;
 
     while (shouldKeepScrolling) {
         // attempt to find a random video that is far down the list
         try {
-            await page.waitForSelector('a[href="/watch?v=ckiP-VnfdBc"]', { timeout: 100 });
+            await page.waitForSelector('a[href="/watch?v=IlAHAqIW_iE"]', { timeout: 100 });
             // set shouldKeepScrolling to false once it is found
             shouldKeepScrolling = false;
         } catch (e) {
@@ -164,10 +127,12 @@ export const getVideoURLs = async () => {
         propertyJsHandles.map(handle => handle.jsonValue())
     );
 
+    await browser.close();
+
     return hrefs;
 }
 
-async function autoScroll(page) {
+const autoScroll = async (page) => {
     await page.evaluate(async () => {
         await new Promise((resolve, reject) => {
             let distance = 1000000;
@@ -186,9 +151,25 @@ async function autoScroll(page) {
     });
 }
 
-function delay(time) {
-    return new Promise(function (resolve) {
-        setTimeout(resolve, time)
-    });
+export const determineGameInVideo = (videoTitle) => {
+    let normalizedTitle = videoTitle.toLowerCase();
+    if (!normalizedTitle.includes('top 8')) {
+        return 'Video not applicable!';
+    } else if (normalizedTitle.includes('umvc3')) {
+        return 'marvel';
+    } else if (normalizedTitle.includes('sf6')) {
+        return 'sf6';
+    } else if (normalizedTitle.includes('strive')) {
+        return 'strive';
+    } else if (normalizedTitle.includes('ssbu') || normalizedTitle.includes('smash') && normalizedTitle.includes('ultimate')) {
+        return 'ssbu';
+    } else {
+        return 'Video not applicable!';
+    }
+
+    //     DBFZ is annoying because of variations of goku, gohan, etc. Will look at potential solution later
+    //     else if (normalizedTitle.includes('dbfz') || normalizedTitle.includes('fighter') && normalizedTitle.includes('z')) {
+    //          return 'dbfz';
+    //     }
 }
 
