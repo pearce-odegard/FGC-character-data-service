@@ -1,11 +1,11 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { characterLists } from "./characterLists.js";
 import { getVideoURLs, scrapeCharactersUsed, determineGameInVideo, tallyCharactersUsed } from "./functions.js";
 
 // the slice removes the first and last items, which for some reason are showing up as empty strings
-const videoList = (await getVideoURLs()).slice(1, -1);
-
-console.log(videoList.length);
-// console.log(videoList[videoList.length - 1]);
+const videoList = (await getVideoURLs(process.env.SEARCHURL)).slice(1, -1);
 
 // const testVideoList = [
 //     'https://www.youtube.com/watch?v=Wy8dQtDamVw',

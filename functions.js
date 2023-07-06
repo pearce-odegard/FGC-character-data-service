@@ -1,7 +1,6 @@
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import AdBlockerPlugin from 'puppeteer-extra-plugin-adblocker';
-import { scrollPageToBottom } from "puppeteer-autoscroll-down";
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdBlockerPlugin());
 
@@ -52,7 +51,7 @@ export const scrapeCharactersUsed = async (videoUrlList, tallyFunction, characte
             return element;
         }
 
-        await waitThenClick('tp-yt-paper-button#expand');
+        await page.waitForSelector('#title > h1 > yt-formatted-string');
 
         const titleString = await page.$eval('#title > h1 > yt-formatted-string', title => title.textContent);
 
@@ -62,6 +61,8 @@ export const scrapeCharactersUsed = async (videoUrlList, tallyFunction, characte
             await page.close();
             continue;
         }
+
+        await waitThenClick('tp-yt-paper-button#expand');
 
         const dateString = await page.$eval('yt-formatted-string#info', info => info.children[2].textContent);
 
@@ -99,11 +100,11 @@ export const scrapeCharactersUsed = async (videoUrlList, tallyFunction, characte
     return tourneyDataList;
 };
 
-export const getVideoURLs = async () => {
+export const getVideoURLs = async (searchURL) => {
     const browser = await puppeteer.launch({ headless: false });
 
     const page = await browser.newPage();
-    await page.goto('https://www.youtube.com/@TampaNeverSleeps/search?query=top%208');
+    await page.goto(searchURL);
 
     let shouldKeepScrolling = true;
 
