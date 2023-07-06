@@ -116,8 +116,10 @@ export const scrapeCharactersUsed = async (videoUrlList, tallyFunction) => {
         // example object for storing data about a given tournament top 8
 
         const dateString = await page.$eval('yt-formatted-string#info', info => info.children[2].textContent)
+        const titleString = await page.$eval('#title > h1 > yt-formatted-string', title => title.textContent);
+
         const currentTourneyData = {
-            title: await page.$eval('#title > h1 > yt-formatted-string', title => title.textContent),
+            title: titleString,
             dateString: dateString,
             date: new Date(dateString).getTime(),
             url: videoUrl,
@@ -137,19 +139,21 @@ export const scrapeCharactersUsed = async (videoUrlList, tallyFunction) => {
 export const getVideoURLs = async () => {
     const browser = await puppeteer.launch({ headless: false });
 
-    const tourneyVideoURLs = [];
-
     const page = await browser.newPage();
     await page.goto('https://www.youtube.com/@TampaNeverSleeps/search?query=umvc3%20top%208');
 
-    let isLoadingAvailable = true // Your condition-to-stop
+    let shouldKeepScrolling = true;
 
-    while (isLoadingAvailable) {
-        await scrollPageToBottom(page, { size: 500 })
-        await page.waitForResponse(
-            response => response.url() === 'https://www.youtube.com/@TampaNeverSleeps/search?query=umvc3%20top%208' && response.status() === 200
-        )
-        isLoadingAvailable = false // Update your condition-to-stop value
+    while (shouldKeepScrolling) {
+        // attempt to find a random video that is far down the list
+        try {
+            await page.waitForSelector('a[href="/watch?v=ckiP-VnfdBc"]', { timeout: 100 });
+            // set shouldKeepScrolling to false once it is found
+            shouldKeepScrolling = false;
+        } catch (e) {
+            // if error thrown, scroll again
+            await autoScroll(page);
+        }
     }
 
     const videoThumbnails = await page.$$('a#thumbnail');
@@ -160,6 +164,31 @@ export const getVideoURLs = async () => {
         propertyJsHandles.map(handle => handle.jsonValue())
     );
 
-    console.log(hrefs);
+    return hrefs;
+}
+
+async function autoScroll(page) {
+    await page.evaluate(async () => {
+        await new Promise((resolve, reject) => {
+            let distance = 1000000;
+            let totalHeight = 0;
+            let timer = setInterval(() => {
+                let scrollHeight = document.body.scrollHeight;
+                window.scrollBy(0, distance);
+                totalHeight += distance;
+
+                if (totalHeight >= scrollHeight) {
+                    clearInterval(timer);
+                    resolve();
+                }
+            }, 100);
+        });
+    });
+}
+
+function delay(time) {
+    return new Promise(function (resolve) {
+        setTimeout(resolve, time)
+    });
 }
 
