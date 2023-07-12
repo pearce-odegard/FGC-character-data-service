@@ -8,7 +8,8 @@ puppeteer.use(StealthPlugin());
 puppeteer.use(AdBlockerPlugin());
 
 import { characterLists } from "./characterLists";
-import { getVideoURLs, scrapeCharactersUsed, determineGameInVideo, tallyCharactersUsed } from "./functions";
+import { getVideoURLs, scrapeCharactersUsed, determineGameInVideo } from "./functions";
+import { tallyCharactersUsed } from './tallyFunction';
 
 
 (async () => {

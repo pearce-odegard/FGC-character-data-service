@@ -4,7 +4,8 @@ export type TourneyData = {
     dateString: string,
     date: number,
     url: string,
-    charactersUsed: CharactersUsed
+    charactersUsed: CharactersUsed,
+    teamsUsed?: Team[]
 }
 
 export type CharactersUsed = {
@@ -14,3 +15,8 @@ export type CharactersUsed = {
 export type CharacterLists = {
     [key: string]: string[]
 }
+
+export type Team = {
+    [key: string]: string
+}
+

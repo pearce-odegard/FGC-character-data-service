@@ -18,15 +18,15 @@ There are 2 different scraping scripts that are apart of this project, both buil
 The first is a scraper I built to collect all Top 8 or relevant tournament video URLs from [Tampa Never Sleeps](https://www.youtube.com/@TampaNeverSleeps).
 Since they are so kind to provide pretty much all of the characters and player matchups in the descriptions of all of their tournament videos,
 I can then scrape character usage data from each individual Top 8 video description for each of my supported games from the URL list. 
-Currently there is support for UMvC3, SF6, GG Strive, and SSBU. DBFZ is in the works (more games TBD).
+Currently there is support for UMvC3, SF6, and SSBU. DBFZ, Strive are in the works (more games TBD).
 
 Unfortunately, because I am relying on the descriptions of tournament VODs, I am only getting data from one Youtube channel. There are also some 
 inconsistencies; misspellings, extra matches getting included in a Top 8 VOD that aren't actual Top 8 matches, etc... 
 But I think the project still captures the bigger picture of diversity in character selection at the top level of fighting games. 
 
 TODO: 
-- refine character naming distinctions ("Goku" vs "Goku Black" etc.)
-- establish relationships between data, prob Prisma (URLs, videos, characters, usage, etc.)
+- refine character naming distinctions ("Goku" vs "Goku Black" etc.) as well as ability to scrape other non-Top 8 videos
+- establish relationships between data, Prisma schema (URLs, videos, characters, usage, etc.)
 - write URL and character usage data to database (likely PostgreSQL on [Railway](https://railway.app))
 - create data visualization front end (t3 stack? next? react?)
 - look at what it would take to scrape data from [start.gg](https://start.gg), other data sourcing options

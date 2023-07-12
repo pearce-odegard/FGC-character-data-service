@@ -19,7 +19,7 @@ const marvel = [
     "Captain", "Deadpool", "Doom", "Strange", "Dormammu",
     "Ghost", "Hawkeye", "Hulk", "Fist", "Man",
     "Magneto", "MODOK", "Nova", "Phoenix", "Rocket",
-    "Sentinel", "She-Hulk", "Shuma-Gorath",
+    "Sentinel", "She-Hulk", "Shuma",
     "Spider", "Storm", "Skrull",
     "Taskmaster", "Thor", "Wolverine", "X-23"
 ]

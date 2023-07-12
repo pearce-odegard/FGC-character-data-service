@@ -2,14 +2,14 @@ import puppeteer from "puppeteer-extra";
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import AdBlockerPlugin from 'puppeteer-extra-plugin-adblocker';
 import { Browser, Page } from "puppeteer";
-import { CharacterLists, CharactersUsed, TourneyData } from "./types";
+import { CharacterLists, CharactersUsed, Team, TourneyData } from "./types";
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdBlockerPlugin());
 
 
 export const scrapeCharactersUsed = async (
     videoUrlList: string[],
-    tallyFunction: (x: string[], y: string[]) => CharactersUsed,
+    tallyFunction: (a: string[], b: string[], c: string) => [CharactersUsed, Team[]],
     characterLists: CharacterLists,
     determineGameTitleFunction: (x: string) => string,
     browser: Browser
@@ -43,10 +43,7 @@ export const scrapeCharactersUsed = async (
             return spans.map(span => (span.textContent ?? "").slice(0, -2));
         })
 
-        // extracting this code to an external function
-        // tallyCharactersUsedMarvel
-
-        let charactersInTop8 = tallyFunction(descriptionArray, characterLists[gameTitle]);
+        const [charactersInTop8, teamsUsedTop8] = tallyFunction(descriptionArray, characterLists[gameTitle], gameTitle);
 
         // example object for storing data about a given tournament top 8
 
@@ -57,6 +54,10 @@ export const scrapeCharactersUsed = async (
             date: new Date(dateString).getTime(),
             url: videoUrl,
             charactersUsed: charactersInTop8
+        }
+
+        if (teamsUsedTop8.length > 0) {
+            currentTourneyData.teamsUsed = teamsUsedTop8;
         }
 
         console.log(currentTourneyData);
@@ -73,7 +74,7 @@ export const scrapeCharactersUsed = async (
 
 export const getVideoURLs = async (searchURL: string, browser: Browser) => {
 
-    const page: Page = await browser.newPage();
+    const page = await browser.newPage();
     await page.goto(searchURL);
 
     let shouldKeepScrolling = true;
@@ -140,32 +141,7 @@ export const determineGameInVideo = (videoTitle: string) => {
     //     else if (normalizedTitle.includes('dbfz') || normalizedTitle.includes('fighter') && normalizedTitle.includes('z')) {
     //          return 'dbfz';
     //     }
-}
-
-export const tallyCharactersUsed = (htmlElementArray: string[], characters: string[]): CharactersUsed => {
-
-
-    const filteredMatchups = htmlElementArray.filter((element, index) => {
-        return element.includes('vs');
-    });
-
-    const charactersInTop8: CharactersUsed = {};
-
-    // RegEx string matching solution
-
-    // Starting by slicing the first 4 elements so as not to include anything other matchups
-    // than winners and losers round 1 of top 8, then mashing it all into one big string (excluding any parentheses, commas, periods, etc)
-    // to be searched
-    const matchupsString = filteredMatchups.slice(0, 4).join("").replace(/(\(|\)|\,|\.|\-)/gm, '');
-
-    for (const character of characters) {
-        const numberOfUses = (matchupsString.match(new RegExp(`${character}`, 'g')) || []).length;
-        if (numberOfUses > 0) {
-            charactersInTop8[character] = numberOfUses;
-        }
-    }
-
-    return charactersInTop8;
+    //     Strive is also causing issues because entire tournaments are being posted as single videos, rather being split into waves
 }
 
 const waitThenClick = async (selector: string, page: Page, clicks = 1) => {
