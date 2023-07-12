@@ -18,5 +18,7 @@
     "puppeteer-extra-plugin-adblocker": "^2.13.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
   },
-  "type": "module"
+  "devDependencies": {
+    "@types/puppeteer": "^7.0.4"
+  }
 }
