@@ -80,13 +80,13 @@ export const getVideoURLs = async (searchURL: string, browser: Browser) => {
     let shouldKeepScrolling = true;
 
     while (shouldKeepScrolling) {
-        // attempt to find a random video that is far down the list
+        // attempt to find a random video that is at the very end of the page
         try {
             await page.waitForSelector('a[href="/watch?v=j4Ffaf-4vUs"]', { timeout: 50 });
             // set shouldKeepScrolling to false once it is found
             shouldKeepScrolling = false;
         } catch (e) {
-            // if error thrown, scroll again
+            // if error thrown, scroll
             await autoScroll(page);
         }
     }
@@ -141,7 +141,7 @@ export const determineGameInVideo = (videoTitle: string) => {
     //     else if (normalizedTitle.includes('dbfz') || normalizedTitle.includes('fighter') && normalizedTitle.includes('z')) {
     //          return 'dbfz';
     //     }
-    //     Strive is also causing issues because entire tournaments are being posted as single videos, rather being split into waves
+    //     Strive is also causing issues because entire tournaments are being posted as single videos, rather than being split into waves
 }
 
 const waitThenClick = async (selector: string, page: Page, clicks = 1) => {

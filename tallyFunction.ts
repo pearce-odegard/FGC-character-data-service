@@ -13,9 +13,10 @@ export function tallyCharactersUsed(htmlElementArray: string[], characters: stri
 
         // RegEx string matching solution
 
-        // Starting by slicing the first 4 elements so as not to include any other matchups
-        // than winners and losers round 1 of top 8, then mashing it all into one big string (excluding any parentheses, commas, periods, etc)
-        // to be searched
+        // Starting by slicing the first 4 elements so as not to include any matchups
+        // besides winners and losers round 1 of top 8, then mashing it all into one big string, 
+        // removing any parentheses, commas, periods, etc...
+        // and splitting it back into an array of individual words
         const wordArray = filteredMatchups.slice(0, 4).join("").replace(/(\(|\)|\,|\.|\-)/gm, '').split(" ");
 
         let teamCounter = 1;

@@ -10,7 +10,6 @@ const sf6 = [
     'Ryu'
 ];
 
-
 const marvel = [
     "Akuma", "Amaterasu", "Arthur", "C.Viper", "Chris", "Chun-Li",
     "Dante", "Felicia", "Firebrand", "Frank", "Haggar", "Hagggar",
