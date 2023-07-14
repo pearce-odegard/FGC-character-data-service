@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 // lists of characters in each game
 const sf6 = [
     'Luke', 'Blanka', 'Rashid', 'Cammy',

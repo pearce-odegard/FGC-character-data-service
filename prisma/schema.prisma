@@ -10,45 +10,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// SF6 Models
-model SF6Character {
-  id             Int             @id @default(autoincrement())
-  createdAt      DateTime        @default(now())
-  name           String
-  SF6Tournaments SF6Tournament[]
+// Models
+model Game {
+  id         Int          @id @default(autoincrement())
+  createdAt  DateTime     @default(now())
+  name       String
+  Character  Character[]
+  Tournament Tournament[]
 }
 
-model SF6Tournament {
-  id             Int            @id @default(autoincrement())
-  createdAt      DateTime       @default(now())
-  title          String
-  date           DateTime
-  url            String
-  charactersUsed SF6Character[]
+model Character {
+  id                      Int                       @id @default(autoincrement())
+  createdAt               DateTime                  @default(now())
+  name                    String
+  game                    Game                      @relation(fields: [gameId], references: [id])
+  gameId                  Int
+  Teams                   Team[]
+  CharactersOnTournaments CharactersOnTournaments[]
 }
 
-// Marvel Models
-model MarvelCharacter {
-  id                Int                @id @default(autoincrement())
-  createdAt         DateTime           @default(now())
-  name              String
-  Teams             MarvelTeam[]
-  MarvelTournaments MarvelTournament[]
+model Team {
+  id          Int          @id @default(autoincrement())
+  createdAt   DateTime     @default(now())
+  characters  Character[]
+  Tournaments Tournament[]
 }
 
-model MarvelTeam {
-  id                Int                @id @default(autoincrement())
-  createdAt         DateTime           @default(now())
-  characters        MarvelCharacter[]
-  MarvelTournaments MarvelTournament[]
+model Tournament {
+  id                      Int                       @id @default(autoincrement())
+  createdAt               DateTime                  @default(now())
+  title                   String
+  date                    DateTime
+  url                     String
+  game                    Game                      @relation(fields: [gameId], references: [id])
+  gameId                  Int
+  teamsUsed               Team[]
+  CharactersOnTournaments CharactersOnTournaments[]
 }
 
-model MarvelTournament {
-  id             Int               @id @default(autoincrement())
-  createdAt      DateTime          @default(now())
-  title          String
-  date           DateTime
-  url            String
-  charactersUsed MarvelCharacter[]
-  teamsUsed      MarvelTeam[]
+// Character/Tournament join table
+model CharactersOnTournaments {
+  createdAt     DateTime   @default(now())
+  character     Character  @relation(fields: [characterId], references: [id])
+  characterId   Int
+  tournament    Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId  Int
+  characterUses Int
+
+  @@id([characterId, tournamentId])
 }
