@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// SF6 Models
+model SF6Character {
+  id             Int             @id @default(autoincrement())
+  createdAt      DateTime        @default(now())
+  name           String
+  SF6Tournaments SF6Tournament[]
+}
+
+model SF6Tournament {
+  id             Int            @id @default(autoincrement())
+  createdAt      DateTime       @default(now())
+  title          String
+  date           DateTime
+  url            String
+  charactersUsed SF6Character[]
+}
+
+// Marvel Models
+model MarvelCharacter {
+  id                Int                @id @default(autoincrement())
+  createdAt         DateTime           @default(now())
+  name              String
+  Teams             MarvelTeam[]
+  MarvelTournaments MarvelTournament[]
+}
+
+model MarvelTeam {
+  id                Int                @id @default(autoincrement())
+  createdAt         DateTime           @default(now())
+  characters        MarvelCharacter[]
+  MarvelTournaments MarvelTournament[]
+}
+
+model MarvelTournament {
+  id             Int               @id @default(autoincrement())
+  createdAt      DateTime          @default(now())
+  title          String
+  date           DateTime
+  url            String
+  charactersUsed MarvelCharacter[]
+  teamsUsed      MarvelTeam[]
+}
