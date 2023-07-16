@@ -1,3 +1,8 @@
+import { Character, PrismaClient } from "@prisma/client";
+
+
+const prisma = new PrismaClient();
+
 // lists of characters in each game
 const sf6 = [
     'Luke', 'Blanka', 'Rashid', 'Cammy',
@@ -19,7 +24,7 @@ const marvel = [
     "Sentinel", "She-Hulk", "Shuma",
     "Spider", "Storm", "Skrull",
     "Taskmaster", "Thor", "Wolverine", "X-23"
-]
+];
 
 const strive = [
     'Sol', 'Ky', 'May', 'Axl',
@@ -40,7 +45,7 @@ const dbfz = [
     'Master Roshi', 'Nappa', 'Piccolo', 'Super Baby 2', 'Tien', 'Trunks', 'Vegeta',
     'Vegeta (SSGSS)', 'Vegeta (Super Saiyan)', 'Vegita (SSGSS)', 'Videl',
     'Yamcha', 'Zamasu (Fused)'
-]
+];
 
 const ssbu = [
     'Mario', 'Donkey Kong', 'Link', 'Samus',
@@ -63,7 +68,7 @@ const ssbu = [
     'Richter', 'King K. Rool', 'Isabelle', 'Incineroar',
     'Piranha Plant', 'Joker', 'Hero', 'Banjo & Kazooie',
     'Terry', 'Byleth', 'Min Min'
-]
+];
 
 export const characterLists = {
     sf6,
@@ -71,4 +76,4 @@ export const characterLists = {
     strive,
     dbfz,
     ssbu
-}
+};

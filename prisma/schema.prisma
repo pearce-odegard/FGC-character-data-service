@@ -27,6 +27,14 @@ model Character {
   gameId                  Int
   Teams                   Team[]
   CharactersOnTournaments CharactersOnTournaments[]
+  altNames                CharacterAltName[]
+}
+
+model CharacterAltName {
+  id          Int       @id @default(autoincrement())
+  name        String
+  Character   Character @relation(fields: [characterId], references: [id])
+  characterId Int
 }
 
 model Team {
