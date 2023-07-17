@@ -1,22 +1,24 @@
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import AdBlockerPlugin from 'puppeteer-extra-plugin-adblocker';
-import { Browser, Page } from "puppeteer";
-import { CharacterLists, CharactersUsed, Team, TourneyData } from "./types";
+import { Browser, Page, Touchscreen } from "puppeteer";
+import { CharacterLists, CharacterPartial, CharactersUsed, TallyFunctionMarvelResult, TallyFunctions, TeamUsed, TourneyData } from "./types";
+import { Character, PrismaClient, Team } from "@prisma/client";
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdBlockerPlugin());
 
 
 export const scrapeCharactersUsed = async (
     videoUrlList: string[],
-    tallyFunction: (a: string[], b: string[], c: string) => [CharactersUsed, Team[]],
+    tallyFunctions: TallyFunctions,
     characterLists: CharacterLists,
     determineGameTitleFunction: (x: string) => string,
-    browser: Browser
+    browser: Browser,
+    prisma: PrismaClient
 ) => {
 
 
-    const tourneyDataList = [];
+    // const tourneyDataList = [];
 
     for (const videoUrl of videoUrlList) {
         const page = await browser.newPage();
@@ -43,33 +45,99 @@ export const scrapeCharactersUsed = async (
             return spans.map(span => (span.textContent ?? "").slice(0, -2));
         })
 
-        const [charactersInTop8, teamsUsedTop8] = tallyFunction(descriptionArray, characterLists[gameTitle], gameTitle);
+        let charactersUsed: CharactersUsed = {};
+        let teamsUsed: TeamUsed[] = [];
+
+        const currentGame = await prisma.game.findFirst({
+            where: {
+                name: gameTitle
+            }
+        });
+
+        const characters = await prisma.character.findMany({
+            where: {
+                gameId: currentGame?.id
+            }
+        });
+
+        if (gameTitle === 'marvel' && currentGame !== null) {
+            const marvelTallyResult = await tallyFunctions.marvel(prisma, currentGame, descriptionArray);
+            charactersUsed = marvelTallyResult.charactersUsed;
+            teamsUsed = marvelTallyResult.teamsUsed;
+        } else if (gameTitle === 'sf6') {
+            charactersUsed = tallyFunctions.sf6(descriptionArray, characters);
+        }
+
+        if (currentGame !== null) {
+            const tournament = await prisma.tournament.create({
+                data: {
+                    title: titleString,
+                    gameId: currentGame.id,
+                    url: videoUrl,
+                    date: new Date(dateString),
+                }
+            })
+
+            for (const team of teamsUsed) {
+                await prisma.tournament.update({
+                    where: {
+                        id: tournament.id,
+                    },
+                    data: {
+                        teamsUsed: {
+                            create: {
+                                characters: {
+                                    connect: [
+                                        { id: team.character1 },
+                                        { id: team.character2 },
+                                        { id: team.character3 },
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                });
+
+            }
+
+            for (const character in charactersUsed) {
+                await prisma.charactersOnTournaments.create({
+                    data: {
+                        characterId: charactersUsed[character].characterId,
+                        characterUses: charactersUsed[character].numOfUses,
+                        tournamentId: tournament.id
+                    }
+                })
+            }
+
+        }
+
 
         // example object for storing data about a given tournament top 8
 
-        const currentTourneyData: TourneyData = {
-            title: titleString,
-            game: gameTitle,
-            dateString: dateString,
-            date: new Date(dateString).getTime(),
-            url: videoUrl,
-            charactersUsed: charactersInTop8
-        }
+        // const currentTourneyData: TourneyData = {
+        //     title: titleString,
+        //     game: gameTitle,
+        //     dateString: dateString,
+        //     date: new Date(dateString).getTime(),
+        //     url: videoUrl,
+        //     charactersUsed: charactersUsed
+        // }
 
-        if (teamsUsedTop8.length > 0) {
-            currentTourneyData.teamsUsed = teamsUsedTop8;
-        }
+        // if (teamsUsed.length > 0) {
+        //     currentTourneyData.teamsUsed = teamsUsed;
+        // }
 
-        console.log(currentTourneyData);
+        // console.log(currentTourneyData);
 
-        tourneyDataList.push(currentTourneyData);
+        // tourneyDataList.push(currentTourneyData);
 
         await page.close();
     }
 
-    // await browser.close();
+    await browser.close();
 
-    return tourneyDataList;
+    // return tourneyDataList;
 };
 
 export const getVideoURLs = async (searchURL: string, browser: Browser) => {
@@ -131,8 +199,8 @@ export const determineGameInVideo = (videoTitle: string) => {
         return 'marvel';
     } else if (normalizedTitle.includes('sf6')) {
         return 'sf6';
-    } else if (normalizedTitle.includes('ssbu') || normalizedTitle.includes('smash') && normalizedTitle.includes('ultimate')) {
-        return 'ssbu';
+        // } else if (normalizedTitle.includes('ssbu') || normalizedTitle.includes('smash') && normalizedTitle.includes('ultimate')) {
+        //     return 'ssbu';
     } else {
         return 'Video not applicable!';
     }

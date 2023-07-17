@@ -1,12 +1,13 @@
-import { CharactersUsed, Team } from "./types";
+import { Character, Game, PrismaClient } from "@prisma/client";
+import { CharacterPartial, CharactersUsed, TeamUsed } from "./types";
 
-export function tallyCharactersUsed(htmlElementArray: string[], characters: string[], game: string): [CharactersUsed, Team[]] {
+export async function tallyCharactersUsed(htmlElementArray: string[], characters: CharacterPartial[], game: Game, prisma: PrismaClient): [CharactersUsed, Team[]] {
 
     const charactersInTop8: CharactersUsed = {};
 
-    const teamsUsed: Team[] = [];
+    const teamsUsed: TeamUsed[] = [];
 
-    if (game === 'marvel') {
+    if (game.name === 'marvel') {
         const filteredMatchups = htmlElementArray.filter((element, index) => {
             return element.includes('vs');
         });
@@ -20,19 +21,29 @@ export function tallyCharactersUsed(htmlElementArray: string[], characters: stri
         const wordArray = filteredMatchups.slice(0, 4).join("").replace(/(\(|\)|\,|\.|\-)/gm, '').split(" ");
 
         let teamCounter = 1;
-        let newTeam: Team = {};
+        let newTeam: TeamUsed = {};
 
         for (const word of wordArray) {
 
-            console.log(teamCounter)
+            const maybeCharacter = await prisma.character.findFirst({
+                where: {
+                    gameId: game.id,
+                    name: word
+                }
+            });
 
-            if (characters.includes(word) && charactersInTop8.hasOwnProperty(word)) {
-                charactersInTop8[word] += 1;
-                newTeam[`character${teamCounter}`] = word;
+            if (maybeCharacter === null) {
+                continue;
+            } else if (charactersInTop8.hasOwnProperty(word)) {
+                charactersInTop8[word].numOfUses += 1;
+                newTeam[`character${teamCounter}`] = maybeCharacter.id;
                 teamCounter += 1;
-            } else if (characters.includes(word)) {
-                charactersInTop8[word] = 1;
-                newTeam[`character${teamCounter}`] = word;
+            } else {
+                charactersInTop8[word] = {
+                    characterId: maybeCharacter.id,
+                    numOfUses: 1
+                };
+                newTeam[`character${teamCounter}`] = maybeCharacter.id;
                 teamCounter += 1;
             }
 
@@ -44,7 +55,7 @@ export function tallyCharactersUsed(htmlElementArray: string[], characters: stri
 
         }
 
-    } else if (game === 'sf6' || game === 'ssbu') {
+    } else if (game.name === 'sf6' || game.name === 'ssbu') {
         const filteredMatchups = htmlElementArray.filter((element, index) => {
             return element.includes('vs');
         });
@@ -57,9 +68,12 @@ export function tallyCharactersUsed(htmlElementArray: string[], characters: stri
         const matchupsString = filteredMatchups.slice(0, 4).join("").replace(/(\(|\)|\,|\.|\-)/gm, '');
 
         for (const character of characters) {
-            const numberOfUses = (matchupsString.match(new RegExp(`${character}`, 'g')) || []).length;
+            const numberOfUses = (matchupsString.match(new RegExp(`${character.name}`, 'g')) || []).length;
             if (numberOfUses > 0) {
-                charactersInTop8[character] = numberOfUses;
+                charactersInTop8[character.name] = {
+                    characterId: character.id,
+                    numOfUses: numberOfUses
+                };
             }
         }
 

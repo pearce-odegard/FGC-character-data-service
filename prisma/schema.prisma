@@ -10,7 +10,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Models
+// URL Model
+
+model VideoURL {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  url       String   @unique
+}
+
+// Models for tournaments
 model Game {
   id         Int          @id @default(autoincrement())
   createdAt  DateTime     @default(now())
@@ -38,10 +46,11 @@ model CharacterAltName {
 }
 
 model Team {
-  id          Int          @id @default(autoincrement())
-  createdAt   DateTime     @default(now())
-  characters  Character[]
-  Tournaments Tournament[]
+  id           Int         @id @default(autoincrement())
+  createdAt    DateTime    @default(now())
+  characters   Character[]
+  Tournament   Tournament  @relation(fields: [tournamentId], references: [id])
+  tournamentId Int
 }
 
 model Tournament {

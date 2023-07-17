@@ -1,7 +1,4 @@
-import { Character, PrismaClient } from "@prisma/client";
-
-
-const prisma = new PrismaClient();
+import { CharacterLists } from "./types";
 
 // lists of characters in each game
 const sf6 = [
@@ -26,26 +23,26 @@ const marvel = [
     "Taskmaster", "Thor", "Wolverine", "X-23"
 ];
 
-const strive = [
-    'Sol', 'Ky', 'May', 'Axl',
-    'Chipp', 'Potemkin', 'Faust', 'Millia',
-    'Zato', 'Ramlethal', 'Leo', 'Nagoriyuki',
-    'Giovanna', 'Anji', 'I-no', 'Goldlewis',
-    "Jack-O'", 'Happy Chaos', 'Baiken', 'Testament',
-    'Bridget', 'Sin', 'Bedman?', 'Asuka'
-]
+// const strive = [
+//     'Sol', 'Ky', 'May', 'Axl',
+//     'Chipp', 'Potemkin', 'Faust', 'Millia',
+//     'Zato', 'Ramlethal', 'Leo', 'Nagoriyuki',
+//     'Giovanna', 'Anji', 'I-no', 'Goldlewis',
+//     "Jack-O'", 'Happy Chaos', 'Baiken', 'Testament',
+//     'Bridget', 'Sin', 'Bedman?', 'Asuka'
+// ]
 
-const dbfz = [
-    'Andriod 16', 'Android 17', 'Android 18', 'Android 21', 'Android 21 (Lab Coat)', 'Bardock',
-    'Beerus', 'Broly', 'Broly (DBS)', 'Captain Ginyu', 'Cell', 'Cooler',
-    'Frieza', 'Gogeta SS4', 'Gogeta (SSGSS)', 'Gohan (Adult)',
-    'Gohan (Teen)', 'Goku', 'Goku (GT)', 'Goku (SSGSS)', 'Goku (Super Saiyan)',
-    'Goku (Ultra Instinct)', 'Goku Black', 'Gotenks', 'Hit',
-    'Janemba', 'Jiren', 'Kefla', 'Kid Buu', 'Krillin', 'Majin Buu',
-    'Master Roshi', 'Nappa', 'Piccolo', 'Super Baby 2', 'Tien', 'Trunks', 'Vegeta',
-    'Vegeta (SSGSS)', 'Vegeta (Super Saiyan)', 'Vegita (SSGSS)', 'Videl',
-    'Yamcha', 'Zamasu (Fused)'
-];
+// const dbfz = [
+//     'Andriod 16', 'Android 17', 'Android 18', 'Android 21', 'Android 21 (Lab Coat)', 'Bardock',
+//     'Beerus', 'Broly', 'Broly (DBS)', 'Captain Ginyu', 'Cell', 'Cooler',
+//     'Frieza', 'Gogeta SS4', 'Gogeta (SSGSS)', 'Gohan (Adult)',
+//     'Gohan (Teen)', 'Goku', 'Goku (GT)', 'Goku (SSGSS)', 'Goku (Super Saiyan)',
+//     'Goku (Ultra Instinct)', 'Goku Black', 'Gotenks', 'Hit',
+//     'Janemba', 'Jiren', 'Kefla', 'Kid Buu', 'Krillin', 'Majin Buu',
+//     'Master Roshi', 'Nappa', 'Piccolo', 'Super Baby 2', 'Tien', 'Trunks', 'Vegeta',
+//     'Vegeta (SSGSS)', 'Vegeta (Super Saiyan)', 'Vegita (SSGSS)', 'Videl',
+//     'Yamcha', 'Zamasu (Fused)'
+// ];
 
 const ssbu = [
     'Mario', 'Donkey Kong', 'Link', 'Samus',
@@ -70,10 +67,10 @@ const ssbu = [
     'Terry', 'Byleth', 'Min Min'
 ];
 
-export const characterLists = {
+
+
+
+export const characterLists: CharacterLists = {
     sf6,
-    marvel,
-    strive,
-    dbfz,
-    ssbu
+    marvel
 };
