@@ -26,7 +26,6 @@ But I think the project still captures the bigger picture of diversity in charac
 
 TODO: 
 - refine character naming distinctions ("Goku" vs "Goku Black" etc.) as well as ability to scrape other non-Top 8 videos
-- establish relationships between data, Prisma schema (URLs, videos, characters, usage, etc.)
 - write URL and character usage data to database (likely PostgreSQL on [Railway](https://railway.app))
 - create data visualization front end (t3 stack? next? react?)
 - look at what it would take to scrape data from [start.gg](https://start.gg), other data sourcing options
