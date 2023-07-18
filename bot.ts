@@ -7,9 +7,7 @@ import AdBlockerPlugin from 'puppeteer-extra-plugin-adblocker';
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdBlockerPlugin());
 
-import { characterLists } from "./characterLists";
 import { getVideoURLs, scrapeCharactersUsed, determineGameInVideo } from "./functions";
-import { tallyCharactersUsed } from './tallyFunction';
 import { Character, PrismaClient } from '@prisma/client';
 import { CharacterLists, CharacterPartial } from './types';
 import { tallyFunctions } from './tallyFunctions';
@@ -30,8 +28,10 @@ const prisma = new PrismaClient();
 
     const videoList = (await prisma.videoURL.findMany()).map(obj => obj.url);
 
-    const characterData = await scrapeCharactersUsed(videoList, tallyFunctions, characterLists, determineGameInVideo, browser, prisma);
-    console.log(characterData);
+    await scrapeCharactersUsed(videoList, tallyFunctions, determineGameInVideo, browser, prisma);
+
+    const tournaments = await prisma.tournament.findMany();
+    console.log(tournaments.length);
 
     await browser.close();
 })();

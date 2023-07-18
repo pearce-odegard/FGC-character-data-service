@@ -1,5 +1,6 @@
 import { Character, Game, PrismaClient } from "@prisma/client";
-import { CharacterPartial, CharactersUsed, TeamUsed } from "./types";
+import { CharactersUsed, TeamUsed } from "./types";
+import { getCharacterByGameIdAndNameOrNull } from "./prismaWrapperFunctions";
 
 const tallyFunctionMarvel = async (prisma: PrismaClient, game: Game, htmlElementArray: string[]) => {
 
@@ -23,25 +24,11 @@ const tallyFunctionMarvel = async (prisma: PrismaClient, game: Game, htmlElement
     let newTeam: TeamUsed = {};
 
     for (const word of wordArray) {
+        const maybeCharacter = await getCharacterByGameIdAndNameOrNull(prisma, game.id, word);
 
-        const maybeCharacter = await prisma.character.findFirst({
-            where: {
-                gameId: game.id,
-                name: word
-            }
-        });
-
-        if (maybeCharacter === null) {
-            continue;
-        } else if (charactersUsed.hasOwnProperty(word)) {
+        if (maybeCharacter) {
+            charactersUsed[word] = charactersUsed[word] || { characterId: maybeCharacter.id, characterUses: 0 };
             charactersUsed[word].characterUses += 1;
-            newTeam[`character${teamCounter}`] = maybeCharacter.id;
-            teamCounter += 1;
-        } else {
-            charactersUsed[word] = {
-                characterId: maybeCharacter.id,
-                characterUses: 1
-            };
             newTeam[`character${teamCounter}`] = maybeCharacter.id;
             teamCounter += 1;
         }
@@ -51,7 +38,6 @@ const tallyFunctionMarvel = async (prisma: PrismaClient, game: Game, htmlElement
             newTeam = {};
             teamCounter = 1;
         }
-
     }
 
     return { charactersUsed, teamsUsed };

@@ -58,7 +58,7 @@ model Tournament {
   createdAt               DateTime                  @default(now())
   title                   String
   date                    DateTime
-  url                     String
+  url                     String                    @unique
   game                    Game                      @relation(fields: [gameId], references: [id])
   gameId                  Int
   teamsUsed               Team[]
