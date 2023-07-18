@@ -7,9 +7,8 @@ import AdBlockerPlugin from 'puppeteer-extra-plugin-adblocker';
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdBlockerPlugin());
 
-import { getVideoURLs, scrapeCharactersUsed, determineGameInVideo } from "./functions";
-import { Character, PrismaClient } from '@prisma/client';
-import { CharacterLists, CharacterPartial } from './types';
+import { scrapeCharactersUsed, determineGameInVideo } from "./functions";
+import { PrismaClient } from '@prisma/client';
 import { tallyFunctions } from './tallyFunctions';
 
 const prisma = new PrismaClient();

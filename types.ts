@@ -7,10 +7,6 @@ export type TourneyData = {
     url: string,
 }
 
-// export type CharactersUsed = {
-//     [key: string]: number
-// }
-
 export type CharactersUsed = {
     [key: string]: {
         characterId: number,
@@ -18,23 +14,8 @@ export type CharactersUsed = {
     }
 }
 
-// export type CharacterUsed = {
-//     name: string
-//     characterId: number,
-//     numOfUses: number
-// }
-
-export type CharacterLists = {
-    [key: string]: string[]
-}
-
 export type TeamUsed = {
     [key: string]: number
-}
-
-export type CharacterPartial = {
-    id: number,
-    name: string
 }
 
 export type TallyFunctionMarvelResult = {
