@@ -2,12 +2,9 @@ import { Character, Game, PrismaClient, Team } from "@prisma/client"
 
 export type TourneyData = {
     title: string,
-    game: string,
-    dateString: string,
-    date: number,
+    gameId: number,
+    date: Date,
     url: string,
-    charactersUsed: CharactersUsed,
-    teamsUsed?: Team[]
 }
 
 // export type CharactersUsed = {
@@ -17,7 +14,7 @@ export type TourneyData = {
 export type CharactersUsed = {
     [key: string]: {
         characterId: number,
-        numOfUses: number
+        characterUses: number
     }
 }
 

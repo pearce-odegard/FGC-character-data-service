@@ -46,7 +46,7 @@ export const scrapeCharactersUsed = async (
         })
 
         let charactersUsed: CharactersUsed = {};
-        let teamsUsed: TeamUsed[] = [];
+        let teamsUsed: TeamUsed[] | null = null;
 
         const currentGame = await prisma.game.findFirst({
             where: {

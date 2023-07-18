@@ -34,13 +34,13 @@ const tallyFunctionMarvel = async (prisma: PrismaClient, game: Game, htmlElement
         if (maybeCharacter === null) {
             continue;
         } else if (charactersUsed.hasOwnProperty(word)) {
-            charactersUsed[word].numOfUses += 1;
+            charactersUsed[word].characterUses += 1;
             newTeam[`character${teamCounter}`] = maybeCharacter.id;
             teamCounter += 1;
         } else {
             charactersUsed[word] = {
                 characterId: maybeCharacter.id,
-                numOfUses: 1
+                characterUses: 1
             };
             newTeam[`character${teamCounter}`] = maybeCharacter.id;
             teamCounter += 1;
@@ -76,7 +76,7 @@ const tallyFunctionSF6 = (htmlElementArray: string[], characters: Character[]) =
         if (numberOfUses > 0) {
             charactersUsed[character.name] = {
                 characterId: character.id,
-                numOfUses: numberOfUses
+                characterUses: numberOfUses
             };
         }
     }
