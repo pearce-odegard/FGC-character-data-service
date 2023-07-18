@@ -1,10 +1,9 @@
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import AdBlockerPlugin from 'puppeteer-extra-plugin-adblocker';
-import { Browser, Page } from "puppeteer";
-import { CharactersUsed, TallyFunctions, TeamUsed, TourneyData } from "./types";
-import { PrismaClient, Tournament } from "@prisma/client";
-import { getCharactersByGame, getGameByName, saveTournament } from "./prismaWrapperFunctions";
+import { Browser, ElementHandle, Page } from "puppeteer";
+import { CharactersUsed, PrismaWrapperFunctions, TallyFunctions, TeamUsed, TourneyData } from "./types";
+import { Character, Game, PrismaClient, Tournament } from "@prisma/client";
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdBlockerPlugin());
 
@@ -12,10 +11,22 @@ puppeteer.use(AdBlockerPlugin());
 export const scrapeCharactersUsed = async (
     videoUrlList: string[],
     tallyFunctions: TallyFunctions,
+    prismaWrapperFunctions: PrismaWrapperFunctions,
+    tallyCharactersUsed: (
+        prisma: PrismaClient,
+        htmlElementArray: string[],
+        tallyFunctions: TallyFunctions,
+        game: Game,
+        characters: Character[],
+        characterFunction: (a: PrismaClient, b: number, c: string) => Promise<Character | null>
+    ) => Promise<[CharactersUsed, TeamUsed[]]>,
     determineGameTitleFunction: (x: string) => string,
+    waitThenClick: (x: string, y: Page, z?: number) => Promise<ElementHandle<Element> | null>,
     browser: Browser,
     prisma: PrismaClient
 ) => {
+
+    const tournaments: Tournament[] = [];
 
     for (const videoUrl of videoUrlList) {
         const page = await browser.newPage();
@@ -42,35 +53,37 @@ export const scrapeCharactersUsed = async (
             return spans.map(span => (span.textContent ?? "").slice(0, -2));
         })
 
-        let charactersUsed: CharactersUsed = {};
-        let teamsUsed: TeamUsed[] = [];
+        const currentGame = await prismaWrapperFunctions.getGameByName(prisma, gameTitle);
 
-        const currentGame = await getGameByName(prisma, gameTitle);
-
-        const characters = await getCharactersByGame(prisma, currentGame.id);
-
-        if (gameTitle === 'marvel') {
-            const marvelTallyResult = await tallyFunctions.marvel(prisma, currentGame, descriptionArray);
-            charactersUsed = marvelTallyResult.charactersUsed;
-            teamsUsed = marvelTallyResult.teamsUsed;
-        } else if (gameTitle === 'sf6') {
-            charactersUsed = tallyFunctions.sf6(descriptionArray, characters);
-        }
+        const characters = await prismaWrapperFunctions.getCharactersByGame(prisma, currentGame.id);
 
         const tourneyData: TourneyData = {
             title: titleString,
             gameId: currentGame.id,
             url: videoUrl,
-            date: new Date(dateString),
+            date: new Date(dateString)
         };
 
-        const tournament = await saveTournament(prisma, tourneyData, charactersUsed, teamsUsed);
+        const [charactersUsed, teamsUsed] = await tallyCharactersUsed(
+            prisma,
+            descriptionArray,
+            tallyFunctions,
+            currentGame,
+            characters,
+            prismaWrapperFunctions.getCharacterByGameIdAndNameOrNull
+        );
+
+        const tournament: Tournament = await prismaWrapperFunctions.saveTournament(prisma, tourneyData, charactersUsed, teamsUsed);
+
+        console.log(tournament);
+        tournaments.push(tournament);
 
         await page.close();
     }
 
     await browser.close();
 
+    return tournaments;
 };
 
 export const getVideoURLs = async (searchURL: string, browser: Browser) => {
@@ -146,9 +159,30 @@ export const determineGameInVideo = (videoTitle: string) => {
     //     Strive is also causing issues because entire tournaments are being posted as single videos, rather than being split into waves
 }
 
-const waitThenClick = async (selector: string, page: Page, clicks = 1) => {
+export const waitThenClick = async (selector: string, page: Page, clicks = 1) => {
     await page.waitForSelector(selector);
     const element = await page.$(selector);
     if (element !== null) await element.click({ clickCount: clicks });
     return element;
+}
+
+export const tallyCharactersUsed = async (
+    prisma: PrismaClient,
+    htmlElementArray: string[],
+    tallyFunctions: TallyFunctions,
+    game: Game,
+    characters: Character[],
+    characterFunction: (a: PrismaClient, b: number, c: string) => Promise<Character | null>
+): Promise<[CharactersUsed, TeamUsed[]]> => {
+
+    let charactersUsed: CharactersUsed = {};
+    let teamsUsed: TeamUsed[] = [];
+
+    if (game.name === 'marvel') {
+        [charactersUsed, teamsUsed] = await tallyFunctions.marvel(prisma, game, htmlElementArray, characterFunction);
+    } else if (game.name === 'sf6') {
+        charactersUsed = tallyFunctions.sf6(htmlElementArray, characters);
+    }
+
+    return [charactersUsed, teamsUsed];
 }

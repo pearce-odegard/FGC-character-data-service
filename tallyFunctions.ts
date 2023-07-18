@@ -1,8 +1,12 @@
-import { Character, Game, PrismaClient } from "@prisma/client";
+import { Character, Game, PrismaClient, Tournament } from "@prisma/client";
 import { CharactersUsed, TeamUsed } from "./types";
-import { getCharacterByGameIdAndNameOrNull } from "./prismaWrapperFunctions";
 
-const tallyFunctionMarvel = async (prisma: PrismaClient, game: Game, htmlElementArray: string[]) => {
+const tallyFunctionMarvel = async (
+    prisma: PrismaClient,
+    game: Game,
+    htmlElementArray: string[],
+    characterFunction: (a: PrismaClient, b: number, c: string) => Promise<Character | null>
+): Promise<[CharactersUsed, TeamUsed[]]> => {
 
     const charactersUsed: CharactersUsed = {};
 
@@ -24,7 +28,7 @@ const tallyFunctionMarvel = async (prisma: PrismaClient, game: Game, htmlElement
     let newTeam: TeamUsed = {};
 
     for (const word of wordArray) {
-        const maybeCharacter = await getCharacterByGameIdAndNameOrNull(prisma, game.id, word);
+        const maybeCharacter = await characterFunction(prisma, game.id, word);
 
         if (maybeCharacter) {
             charactersUsed[word] = charactersUsed[word] || { characterId: maybeCharacter.id, characterUses: 0 };
@@ -40,7 +44,7 @@ const tallyFunctionMarvel = async (prisma: PrismaClient, game: Game, htmlElement
         }
     }
 
-    return { charactersUsed, teamsUsed };
+    return [charactersUsed, teamsUsed];
 }
 
 const tallyFunctionSF6 = (htmlElementArray: string[], characters: Character[]) => {

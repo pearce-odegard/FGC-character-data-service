@@ -1,5 +1,3 @@
-import { CharacterLists } from "./types";
-
 // lists of characters in each game
 const sf6 = [
     'Luke', 'Blanka', 'Rashid', 'Cammy',
@@ -66,11 +64,3 @@ const ssbu = [
     'Piranha Plant', 'Joker', 'Hero', 'Banjo & Kazooie',
     'Terry', 'Byleth', 'Min Min'
 ];
-
-
-
-
-export const characterLists: CharacterLists = {
-    sf6,
-    marvel
-};

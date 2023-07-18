@@ -2,9 +2,9 @@ import { Character, PrismaClient } from "@prisma/client";
 import { CharactersUsed, TeamUsed, TourneyData } from "./types";
 
 
-export const getCharactersByGame = async (prisma: PrismaClient, gameId: number) => {
+const getCharactersByGame = async (prisma: PrismaClient, gameId: number) => {
 
-    let characters: Character[] = await prisma.character.findMany({
+    const characters: Character[] = await prisma.character.findMany({
         where: {
             gameId: gameId
         }
@@ -13,9 +13,9 @@ export const getCharactersByGame = async (prisma: PrismaClient, gameId: number) 
     return characters;
 }
 
-export const getCharacterById = async (prisma: PrismaClient, id: number) => {
+const getCharacterById = async (prisma: PrismaClient, id: number) => {
 
-    let character = await prisma.character.findUnique({
+    const character = await prisma.character.findUnique({
         where: {
             id: id
         }
@@ -26,23 +26,23 @@ export const getCharacterById = async (prisma: PrismaClient, id: number) => {
     return character;
 }
 
-export const getCharacterByGameIdAndNameOrNull = async (prisma: PrismaClient, id: number, name: string) => {
+const getCharacterByGameIdAndNameOrNull = async (prisma: PrismaClient, id: number, name: string) => {
 
-    let character = await prisma.character.findFirst({
+    const character = await prisma.character.findFirst({
         where: {
             gameId: id,
             name: name
         }
     });
 
-    // Does not have a null check because we want to check whether 
+    // Does not have a null check like others because we want can use the null value elsewhere
 
     return character;
 }
 
-export const getGameById = async (prisma: PrismaClient, id: number) => {
+const getGameById = async (prisma: PrismaClient, id: number) => {
 
-    let game = await prisma.game.findUnique({
+    const game = await prisma.game.findUnique({
         where: {
             id: id
         }
@@ -53,9 +53,9 @@ export const getGameById = async (prisma: PrismaClient, id: number) => {
     return game;
 }
 
-export const getGameByName = async (prisma: PrismaClient, name: string) => {
+const getGameByName = async (prisma: PrismaClient, name: string) => {
 
-    let game = await prisma.game.findFirst({
+    const game = await prisma.game.findFirst({
         where: {
             name: name
         }
@@ -66,7 +66,7 @@ export const getGameByName = async (prisma: PrismaClient, name: string) => {
     return game;
 }
 
-export const saveTournament = async (prisma: PrismaClient, tourneyData: TourneyData, charactersUsed: CharactersUsed, teamsUsed: TeamUsed[]) => {
+const saveTournament = async (prisma: PrismaClient, tourneyData: TourneyData, charactersUsed: CharactersUsed, teamsUsed: TeamUsed[]) => {
 
     try {
         const tournament = await prisma.tournament.create({
@@ -93,8 +93,23 @@ export const saveTournament = async (prisma: PrismaClient, tourneyData: TourneyD
 
     } catch (e) {
         console.log("Tournament already exists in database");
+    } finally {
+        const tournament = await prisma.tournament.findFirst({
+            where: tourneyData
+        });
+
+        if (tournament == null) throw new Error(`INTERNAL SERVER ERROR: No tournament found with url ${tourneyData.url}`);
+
+        return tournament;
     }
 
 }
 
-// export const connectTeams
+export const prismaWrapperFunctions = {
+    getCharactersByGame,
+    getCharacterByGameIdAndNameOrNull,
+    getCharacterById,
+    getGameById,
+    getGameByName,
+    saveTournament
+}
