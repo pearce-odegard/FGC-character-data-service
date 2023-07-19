@@ -20,4 +20,6 @@ const prisma = new PrismaClient();
         })
     });
 
+    await browser.close();
+
 })();

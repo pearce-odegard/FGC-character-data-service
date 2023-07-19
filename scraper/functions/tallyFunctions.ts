@@ -5,14 +5,15 @@ export const tallyFunctionMarvel = async (
     prisma: PrismaClient,
     game: Game,
     htmlElementArray: string[],
-    characterFunction: (a: PrismaClient, b: number, c: string) => Promise<Character | null>
+    characterFunction: (a: PrismaClient, b: number, c: string) => Promise<Character | null>,
+    charNameCheck: typeof checkUniqueCharNamingMarvel
 ): Promise<[CharactersUsed, TeamUsed[]]> => {
 
     const charactersUsed: CharactersUsed = {};
 
     const teamsUsed: TeamUsed[] = [];
 
-    const filteredMatchups = htmlElementArray.filter((element, index) => {
+    const filteredMatchups = htmlElementArray.filter((element) => {
         return element.includes('vs');
     });
 
@@ -27,10 +28,12 @@ export const tallyFunctionMarvel = async (
     let teamCounter = 1;
     let newTeam: TeamUsed = {};
 
-    for (const word of wordArray) {
+    for (const [i, word] of wordArray.entries()) {
         const maybeCharacter = await characterFunction(prisma, game.id, word);
 
-        if (maybeCharacter) {
+        const passesCheck = charNameCheck(word, wordArray[i + 1], wordArray[i - 1]);
+
+        if (maybeCharacter && passesCheck) {
             charactersUsed[word] = charactersUsed[word] || { characterId: maybeCharacter.id, characterUses: 0 };
             charactersUsed[word].characterUses += 1;
             newTeam[`character${teamCounter}`] = maybeCharacter.id;
@@ -47,8 +50,8 @@ export const tallyFunctionMarvel = async (
     return [charactersUsed, teamsUsed];
 }
 
-export const tallyFunctionSF6 = (htmlElementArray: string[], characters: Character[]) => {
-    const filteredMatchups = htmlElementArray.filter((element, index) => {
+export const tallyFunctionSF6 = async (prisma: PrismaClient, htmlElementArray: string[], characters: Character[]) => {
+    const filteredMatchups = htmlElementArray.filter((element) => {
         return element.includes('vs');
     });
 
@@ -62,7 +65,18 @@ export const tallyFunctionSF6 = (htmlElementArray: string[], characters: Charact
     const matchupsString = filteredMatchups.slice(0, 4).join("").replace(/(\(|\)|\,|\.|\-)/gm, '');
 
     for (const character of characters) {
-        const numberOfUses = (matchupsString.match(new RegExp(`${character.name}`, 'g')) || []).length;
+        const charAltNames = await prisma.characterAltName.findMany({
+            where: {
+                characterId: character.id
+            }
+        });
+
+        let regExString = character.name;
+
+        if (charAltNames.length > 0) charAltNames.forEach(obj => regExString += `|${obj.name}`);
+
+        const numberOfUses = (matchupsString.match(new RegExp(regExString, 'g')) || []).length;
+
         if (numberOfUses > 0) {
             charactersUsed[character.name] = {
                 characterId: character.id,
@@ -74,8 +88,17 @@ export const tallyFunctionSF6 = (htmlElementArray: string[], characters: Charact
     return charactersUsed;
 }
 
-export const tallyFunctions: TallyFunctions = {
-    marvel: tallyFunctionMarvel,
-    sf6: tallyFunctionSF6
+export const checkUniqueCharNamingMarvel = (current: string, next: string, previous: string) => {
+    switch (true) {
+        case current === 'Ghost':
+            return next === 'Rider';
+        case current === 'Man':
+            return previous === 'Iron';
+        case current === 'Fist':
+            return previous === 'Iron';
+        default:
+            return true;
+    }
 }
+
 

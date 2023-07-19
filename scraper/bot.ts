@@ -6,6 +6,7 @@ puppeteer.use(AdBlockerPlugin());
 
 import { PrismaClient } from '@prisma/client';
 import { scrapeCharactersUsed, tallyFunctions, prismaWrapperFunctions, tallyCharactersUsed, determineGameInVideo, waitThenClick } from "./functions";
+import { checkUniqueCharNamingMarvel } from "./functions/tallyFunctions";
 
 const prisma = new PrismaClient();
 
@@ -20,6 +21,7 @@ const prisma = new PrismaClient();
         prismaWrapperFunctions,
         tallyCharactersUsed,
         determineGameInVideo,
+        checkUniqueCharNamingMarvel,
         waitThenClick,
         browser,
         prisma

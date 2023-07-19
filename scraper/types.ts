@@ -23,9 +23,10 @@ export type TallyFunctions = {
         prisma: PrismaClient,
         game: Game,
         htmlElementArray: string[],
-        characterFunction: (prisma: PrismaClient, id: number, name: string) => Promise<Character | null>
+        characterFunction: (prisma: PrismaClient, id: number, name: string) => Promise<Character | null>,
+        charNameCheck: (current: string, next: string, previous: string) => boolean
     ) => Promise<[CharactersUsed, TeamUsed[]]>,
-    sf6: (htmlElementArray: string[], characters: Character[]) => CharactersUsed
+    sf6: (prisma: PrismaClient, htmlElementArray: string[], characters: Character[]) => Promise<CharactersUsed>
 }
 
 export type PrismaWrapperFunctions = {
