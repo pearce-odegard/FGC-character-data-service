@@ -1,8 +1,7 @@
 import { Character, PrismaClient } from "@prisma/client";
-import { CharactersUsed, TeamUsed, TourneyData } from "./types";
+import { CharactersUsed, TeamUsed, TourneyData } from "../types";
 
-
-const getCharactersByGame = async (prisma: PrismaClient, gameId: number) => {
+export const getCharactersByGame = async (prisma: PrismaClient, gameId: number) => {
 
     const characters: Character[] = await prisma.character.findMany({
         where: {
@@ -13,7 +12,7 @@ const getCharactersByGame = async (prisma: PrismaClient, gameId: number) => {
     return characters;
 }
 
-const getCharacterById = async (prisma: PrismaClient, id: number) => {
+export const getCharacterById = async (prisma: PrismaClient, id: number) => {
 
     const character = await prisma.character.findUnique({
         where: {
@@ -26,7 +25,7 @@ const getCharacterById = async (prisma: PrismaClient, id: number) => {
     return character;
 }
 
-const getCharacterByGameIdAndNameOrNull = async (prisma: PrismaClient, id: number, name: string) => {
+export const getCharacterByGameIdAndNameOrNull = async (prisma: PrismaClient, id: number, name: string) => {
 
     let character = await prisma.character.findFirst({
         where: {
@@ -54,7 +53,7 @@ const getCharacterByGameIdAndNameOrNull = async (prisma: PrismaClient, id: numbe
     return null;
 }
 
-const getGameById = async (prisma: PrismaClient, id: number) => {
+export const getGameById = async (prisma: PrismaClient, id: number) => {
 
     const game = await prisma.game.findUnique({
         where: {
@@ -67,7 +66,7 @@ const getGameById = async (prisma: PrismaClient, id: number) => {
     return game;
 }
 
-const getGameByName = async (prisma: PrismaClient, name: string) => {
+export const getGameByName = async (prisma: PrismaClient, name: string) => {
 
     const game = await prisma.game.findFirst({
         where: {
@@ -80,14 +79,14 @@ const getGameByName = async (prisma: PrismaClient, name: string) => {
     return game;
 }
 
-const saveTournament = async (prisma: PrismaClient, tourneyData: TourneyData, charactersUsed: CharactersUsed, teamsUsed: TeamUsed[]) => {
+export const saveTournament = async (prisma: PrismaClient, tourneyData: TourneyData, charactersUsed: CharactersUsed, teamsUsed: TeamUsed[]) => {
 
     const tournament = await prisma.tournament.findFirst({
         where: tourneyData
     });
 
     if (tournament) {
-        console.log(`Tournament ${tournament.url} ${tournament.title} already exists in db`)
+        console.log(`Tournament ${tournament.url} already exists in db`)
         return tournament;
     }
 
@@ -129,11 +128,3 @@ const saveTournament = async (prisma: PrismaClient, tourneyData: TourneyData, ch
     return newTournament;
 }
 
-export const prismaWrapperFunctions = {
-    getCharactersByGame,
-    getCharacterByGameIdAndNameOrNull,
-    getCharacterById,
-    getGameById,
-    getGameByName,
-    saveTournament
-}

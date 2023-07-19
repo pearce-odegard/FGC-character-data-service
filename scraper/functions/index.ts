@@ -1,12 +1,42 @@
-import puppeteer from "puppeteer-extra";
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import AdBlockerPlugin from 'puppeteer-extra-plugin-adblocker';
-import { Browser, ElementHandle, Page } from "puppeteer";
-import { CharactersUsed, PrismaWrapperFunctions, TallyFunctions, TeamUsed, TourneyData } from "./types";
-import { Character, Game, PrismaClient, Tournament } from "@prisma/client";
-puppeteer.use(StealthPlugin());
-puppeteer.use(AdBlockerPlugin());
+import { PrismaClient, Game, Character } from "@prisma/client";
+import { TallyFunctions, CharactersUsed, TeamUsed } from "../types";
+import { getCharacterByGameIdAndNameOrNull, getCharacterById, getCharactersByGame, getGameById, getGameByName, saveTournament } from "./prismaWrapperFunctions";
+import { tallyFunctionMarvel, tallyFunctionSF6 } from "./tallyFunctions";
 
+export const prismaWrapperFunctions = {
+    getCharactersByGame,
+    getCharacterByGameIdAndNameOrNull,
+    getCharacterById,
+    getGameById,
+    getGameByName,
+    saveTournament
+}
+
+export const tallyFunctions: TallyFunctions = {
+    marvel: tallyFunctionMarvel,
+    sf6: tallyFunctionSF6
+}
+
+export const tallyCharactersUsed = async (
+    prisma: PrismaClient,
+    htmlElementArray: string[],
+    tallyFunctions: TallyFunctions,
+    game: Game,
+    characters: Character[],
+    characterFunction: (a: PrismaClient, b: number, c: string) => Promise<Character | null>
+): Promise<[CharactersUsed, TeamUsed[]]> => {
+
+    let charactersUsed: CharactersUsed = {};
+    let teamsUsed: TeamUsed[] = [];
+
+    if (game.name === 'marvel') {
+        [charactersUsed, teamsUsed] = await tallyFunctions.marvel(prisma, game, htmlElementArray, characterFunction);
+    } else if (game.name === 'sf6') {
+        charactersUsed = tallyFunctions.sf6(htmlElementArray, characters);
+    }
+
+    return [charactersUsed, teamsUsed];
+}
 
 export const scrapeCharactersUsed = async (
     videoUrlList: string[],
@@ -86,57 +116,6 @@ export const scrapeCharactersUsed = async (
     return tournaments;
 };
 
-export const getVideoURLs = async (searchURL: string, browser: Browser) => {
-
-    const page = await browser.newPage();
-    await page.goto(searchURL);
-
-    let shouldKeepScrolling = true;
-
-    while (shouldKeepScrolling) {
-        // attempt to find a random video that is at the very end of the page
-        try {
-            await page.waitForSelector('a[href="/watch?v=j4Ffaf-4vUs"]', { timeout: 50 });
-            // set shouldKeepScrolling to false once it is found
-            shouldKeepScrolling = false;
-        } catch (e) {
-            // if error thrown, scroll
-            await autoScroll(page);
-        }
-    }
-
-    const videoThumbnails = await page.$$('a#thumbnail.ytd-thumbnail');
-    const propertyJsHandles = await Promise.all(
-        videoThumbnails.map(handle => handle.getProperty('href'))
-    );
-    const hrefs = await Promise.all(
-        propertyJsHandles.map(handle => handle.jsonValue())
-    );
-
-    await page.close();
-
-    return hrefs;
-}
-
-const autoScroll = async (page: Page) => {
-    await page.evaluate(async () => {
-        await new Promise((resolve, reject) => {
-            let distance = 1000000;
-            let totalHeight = 0;
-            let timer = setInterval(() => {
-                let scrollHeight = document.body.scrollHeight;
-                window.scrollBy(0, distance);
-                totalHeight += distance;
-
-                if (totalHeight >= scrollHeight) {
-                    clearInterval(timer);
-                    resolve(true);
-                }
-            }, 50);
-        });
-    });
-}
-
 export const determineGameInVideo = (videoTitle: string) => {
     const normalizedTitle = videoTitle.toLowerCase();
     switch (true) {
@@ -166,25 +145,4 @@ export const waitThenClick = async (selector: string, page: Page, clicks = 1) =>
     const element = await page.$(selector);
     if (element !== null) await element.click({ clickCount: clicks });
     return element;
-}
-
-export const tallyCharactersUsed = async (
-    prisma: PrismaClient,
-    htmlElementArray: string[],
-    tallyFunctions: TallyFunctions,
-    game: Game,
-    characters: Character[],
-    characterFunction: (a: PrismaClient, b: number, c: string) => Promise<Character | null>
-): Promise<[CharactersUsed, TeamUsed[]]> => {
-
-    let charactersUsed: CharactersUsed = {};
-    let teamsUsed: TeamUsed[] = [];
-
-    if (game.name === 'marvel') {
-        [charactersUsed, teamsUsed] = await tallyFunctions.marvel(prisma, game, htmlElementArray, characterFunction);
-    } else if (game.name === 'sf6') {
-        charactersUsed = tallyFunctions.sf6(htmlElementArray, characters);
-    }
-
-    return [charactersUsed, teamsUsed];
 }
