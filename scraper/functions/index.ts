@@ -3,7 +3,7 @@ import { CharactersUsed, TeamUsed, TourneyData } from "../types";
 import { getCharacterByGameIdAndNameOrNull, getCharacterById, getCharactersByGame, getGameById, getGameByName, saveTournament } from "./prismaWrapperFunctions";
 import { checkUniqueCharNamingMarvel, tallyFunctionMarvel, tallyFunctionSF6 } from "./tallyFunctions";
 import { Page, Browser } from "puppeteer";
-import { TallyFunctions, PrismaWrapperFunctions, DetermineGameTitleFunction, CheckUniqueCharNamingMarvel, WaitThenClick, ExecuteTallyFunction } from "./types";
+import { TallyFunctions, PrismaWrapperFunctions, DetermineGameTitleFunction, WaitThenClick, ExecuteTallyFunction } from "./types";
 
 export const prismaWrapperFunctions = {
     getCharactersByGame,
@@ -69,7 +69,9 @@ export const scrapeCharactersUsed = async (
 
         const titleString = await page.$eval('#title > h1 > yt-formatted-string', title => title.textContent) ?? "";
 
-        const gameTitle: string = determineGameTitleFunction(titleString);
+        const allGames = await prisma.game.findMany();
+
+        const gameTitle: string = determineGameTitleFunction(titleString, allGames);
 
         if (gameTitle === 'Video not applicable!') {
             await page.close();
@@ -85,7 +87,7 @@ export const scrapeCharactersUsed = async (
             return spans.map(span => (span.textContent ?? "").slice(0, -2));
         })
 
-        const currentGame = await prismaWrapperFunctions.getGameByName(prisma, gameTitle);
+        const currentGame = allGames.filter(game => game.name === gameTitle)[0];
 
         const characters = await prismaWrapperFunctions.getCharactersByGame(prisma, currentGame.id);
 
@@ -118,29 +120,28 @@ export const scrapeCharactersUsed = async (
     return tournaments;
 };
 
-export const determineGameInVideo = (videoTitle: string) => {
+export const determineGameInVideo = (videoTitle: string, games: Game[]) => {
     const normalizedTitle = videoTitle.toLowerCase();
-    switch (true) {
-        case !normalizedTitle.includes('top 8')
-            || normalizedTitle.includes("palette")
-            || normalizedTitle.includes("swap"):
-            return 'Video not applicable!';
-        case normalizedTitle.includes('umvc3'):
-            return 'marvel';
-        case normalizedTitle.includes('sf6'):
-            return 'sf6';
-        default:
-            return 'Video not applicable!';
+    const gameNames = games.map(game => game.name);
+
+    if (!normalizedTitle.includes('top 8') || normalizedTitle.includes("palette") || normalizedTitle.includes("swap")) {
+        return 'Video not applicable!';
     }
 
-    // } else if (normalizedTitle.includes('ssbu') || normalizedTitle.includes('smash') && normalizedTitle.includes('ultimate')) {
-    //     return 'ssbu';
-    //     DBFZ is annoying because of variations of goku, gohan, etc. Will look at potential solution later
-    //     else if (normalizedTitle.includes('dbfz') || normalizedTitle.includes('fighter') && normalizedTitle.includes('z')) {
-    //          return 'dbfz';
-    //     }
-    //     Strive is also causing issues because entire tournaments are being posted as single videos, rather than being split into waves
+    gameNames.forEach(name => {
+        if (normalizedTitle.includes(name)) return name;
+    })
+
+    return 'Video not applicable!';
 }
+
+// } else if (normalizedTitle.includes('ssbu') || normalizedTitle.includes('smash') && normalizedTitle.includes('ultimate')) {
+//     return 'ssbu';
+//     DBFZ is annoying because of variations of goku, gohan, etc. Will look at potential solution later
+//     else if (normalizedTitle.includes('dbfz') || normalizedTitle.includes('fighter') && normalizedTitle.includes('z')) {
+//          return 'dbfz';
+//     }
+//     Strive is also causing issues because entire tournaments are being posted as single videos, rather than being split into waves
 
 export const waitThenClick = async (selector: string, page: Page, clicks = 1) => {
     await page.waitForSelector(selector);
