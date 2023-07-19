@@ -2,11 +2,12 @@ import puppeteer from "puppeteer-extra";
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import AdBlockerPlugin from 'puppeteer-extra-plugin-adblocker';
 import { Browser, Page } from "puppeteer";
+import { AutoScroll } from "./types";
 
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdBlockerPlugin());
 
-export const scrapeVideoURLs = async (searchURL: string, browser: Browser, scroller: (page: Page) => Promise<void>) => {
+export const scrapeVideoURLs = async (searchURL: string, browser: Browser, scroller: AutoScroll) => {
 
     const page = await browser.newPage();
     await page.goto(searchURL);

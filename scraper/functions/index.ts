@@ -1,8 +1,9 @@
 import { PrismaClient, Game, Character, Tournament } from "@prisma/client";
-import { TallyFunctions, CharactersUsed, TeamUsed, PrismaWrapperFunctions, TourneyData } from "../types";
+import { CharactersUsed, TeamUsed, TourneyData } from "../types";
 import { getCharacterByGameIdAndNameOrNull, getCharacterById, getCharactersByGame, getGameById, getGameByName, saveTournament } from "./prismaWrapperFunctions";
 import { checkUniqueCharNamingMarvel, tallyFunctionMarvel, tallyFunctionSF6 } from "./tallyFunctions";
-import { Page, ElementHandle, Browser } from "puppeteer";
+import { Page, Browser } from "puppeteer";
+import { TallyFunctions, PrismaWrapperFunctions, DetermineGameTitleFunction, CheckUniqueCharNamingMarvel, WaitThenClick, ExecuteTallyFunction } from "./types";
 
 export const prismaWrapperFunctions = {
     getCharactersByGame,
@@ -13,26 +14,32 @@ export const prismaWrapperFunctions = {
     saveTournament
 }
 
-export const tallyFunctions: TallyFunctions = {
+export const tallyFunctions = {
     marvel: tallyFunctionMarvel,
-    sf6: tallyFunctionSF6
+    sf6: tallyFunctionSF6,
+    checkUniqueCharNamingMarvel
 }
 
-export const tallyCharactersUsed = async (
+export const executeTallyFunction = async (
     prisma: PrismaClient,
     htmlElementArray: string[],
     tallyFunctions: TallyFunctions,
     game: Game,
     characters: Character[],
-    characterFunction: (a: PrismaClient, b: number, c: string) => Promise<Character | null>,
-    charNameCheck: typeof checkUniqueCharNamingMarvel
+    characterFunction: PrismaWrapperFunctions['getCharacterByGameIdAndNameOrNull']
 ): Promise<[CharactersUsed, TeamUsed[]]> => {
 
     let charactersUsed: CharactersUsed = {};
     let teamsUsed: TeamUsed[] = [];
 
     if (game.name === 'marvel') {
-        [charactersUsed, teamsUsed] = await tallyFunctions.marvel(prisma, game, htmlElementArray, characterFunction, charNameCheck);
+        [charactersUsed, teamsUsed] = await tallyFunctions.marvel(
+            prisma,
+            game,
+            htmlElementArray,
+            characterFunction,
+            tallyFunctions.checkUniqueCharNamingMarvel
+        );
     } else if (game.name === 'sf6') {
         charactersUsed = await tallyFunctions.sf6(prisma, htmlElementArray, characters);
     }
@@ -44,18 +51,9 @@ export const scrapeCharactersUsed = async (
     videoUrlList: string[],
     tallyFunctions: TallyFunctions,
     prismaWrapperFunctions: PrismaWrapperFunctions,
-    tallyCharactersUsed: (
-        prisma: PrismaClient,
-        htmlElementArray: string[],
-        tallyFunctions: TallyFunctions,
-        game: Game,
-        characters: Character[],
-        characterFunction: (a: PrismaClient, b: number, c: string) => Promise<Character | null>,
-        charNameCheck: typeof checkUniqueCharNamingMarvel
-    ) => Promise<[CharactersUsed, TeamUsed[]]>,
-    determineGameTitleFunction: (x: string) => string,
-    charNameCheck: typeof checkUniqueCharNamingMarvel,
-    waitThenClick: (x: string, y: Page, z?: number) => Promise<ElementHandle<Element> | null>,
+    executeTallyFunction: ExecuteTallyFunction,
+    determineGameTitleFunction: DetermineGameTitleFunction,
+    waitThenClick: WaitThenClick,
     browser: Browser,
     prisma: PrismaClient
 ) => {
@@ -98,14 +96,13 @@ export const scrapeCharactersUsed = async (
             date: new Date(dateString)
         };
 
-        const [charactersUsed, teamsUsed] = await tallyCharactersUsed(
+        const [charactersUsed, teamsUsed] = await executeTallyFunction(
             prisma,
             descriptionArray,
             tallyFunctions,
             currentGame,
             characters,
-            prismaWrapperFunctions.getCharacterByGameIdAndNameOrNull,
-            charNameCheck
+            prismaWrapperFunctions.getCharacterByGameIdAndNameOrNull
         );
 
         const tournament: Tournament = await prismaWrapperFunctions.saveTournament(prisma, tourneyData, charactersUsed, teamsUsed);

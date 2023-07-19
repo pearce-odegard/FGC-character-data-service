@@ -1,12 +1,13 @@
 import { Character, Game, PrismaClient } from "@prisma/client";
-import { CharactersUsed, TallyFunctions, TeamUsed } from "../types";
+import { CharactersUsed, TeamUsed } from "../types";
+import { CheckUniqueCharNamingMarvel, PrismaWrapperFunctions } from "./types";
 
 export const tallyFunctionMarvel = async (
     prisma: PrismaClient,
     game: Game,
     htmlElementArray: string[],
-    characterFunction: (a: PrismaClient, b: number, c: string) => Promise<Character | null>,
-    charNameCheck: typeof checkUniqueCharNamingMarvel
+    characterFunction: PrismaWrapperFunctions['getCharacterByGameIdAndNameOrNull'],
+    charNameCheck: CheckUniqueCharNamingMarvel
 ): Promise<[CharactersUsed, TeamUsed[]]> => {
 
     const charactersUsed: CharactersUsed = {};
