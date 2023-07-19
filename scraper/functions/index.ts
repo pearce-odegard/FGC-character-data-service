@@ -1,7 +1,8 @@
-import { PrismaClient, Game, Character } from "@prisma/client";
-import { TallyFunctions, CharactersUsed, TeamUsed } from "../types";
+import { PrismaClient, Game, Character, Tournament } from "@prisma/client";
+import { TallyFunctions, CharactersUsed, TeamUsed, PrismaWrapperFunctions, TourneyData } from "../types";
 import { getCharacterByGameIdAndNameOrNull, getCharacterById, getCharactersByGame, getGameById, getGameByName, saveTournament } from "./prismaWrapperFunctions";
 import { tallyFunctionMarvel, tallyFunctionSF6 } from "./tallyFunctions";
+import { Page, ElementHandle, Browser } from "puppeteer";
 
 export const prismaWrapperFunctions = {
     getCharactersByGame,
