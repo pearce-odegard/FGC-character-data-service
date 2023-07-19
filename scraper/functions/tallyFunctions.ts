@@ -97,6 +97,10 @@ export const checkUniqueCharNamingMarvel = (current: string, next: string, previ
             return previous === 'Iron';
         case current === 'Fist':
             return previous === 'Iron';
+        case current === 'Captain':
+            return next === 'America'
+        case current === 'Rocket':
+            return next === 'Raccoon'
         default:
             return true;
     }
