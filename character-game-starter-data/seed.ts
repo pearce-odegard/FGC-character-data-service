@@ -1,75 +1,96 @@
 import { PrismaClient } from "@prisma/client";
-import { marvel, sf6 } from "./characterLists";
+import { characterLists } from "./characterLists";
 
 (async () => {
 
     const prisma = new PrismaClient();
 
-    // // seed games
-    // await prisma.game.createMany({
-    //     data: [
-    //         { name: 'sf6' },
-    //         { name: 'marvel' }
-    //     ]
-    // });
-
-    // // seed sf6 characters
-    await prisma.game.update({
-        where: {
-            name: 'sf6'
-        },
-        data: {
-            Character: {
-                create: sf6.map(name => {
-                    return { name }
-                })
+    // seed games
+    await prisma.game.createMany({
+        data: Object.keys(characterLists).map(name => {
+            return {
+                name: name
             }
-        }
+        }),
+        skipDuplicates: true
     });
 
-    // seed marvel characters
-    await prisma.game.update({
-        where: {
-            name: 'marvel'
-        },
-        data: {
-            Character: {
-                create: marvel.map(name => {
-                    return { name }
-                })
-            }
-        }
-    });
+    // seed characters
+    // for (const [name, arr] of Object.entries(characterLists)) {
+    //     await prisma.game.update({
+    //         where: {
+    //             name: name
+    //         },
+    //         data: {
+    //             Characters: {
+    //                 createMany: {
+    //                     data: arr.map(name => {
+    //                         return { name }
+    //                     })
+    //                 }
+    //             }
+    //         }
+    //     });
+    // }
 
     // seed alt character names
-    const haggar = await prisma.character.findFirst({
-        where: {
-            name: "Haggar"
-        }
-    });
+    // const haggar = await prisma.character.findFirst({
+    //     where: {
+    //         name: "Haggar"
+    //     }
+    // });
 
-    if (haggar) {
-        await prisma.characterAltName.create({
-            data: {
-                name: 'Hagggar',
-                characterId: haggar.id
-            }
-        })
-    }
+    // if (haggar) {
+    //     await prisma.characterAltName.create({
+    //         data: {
+    //             name: 'Hagggar',
+    //             characterId: haggar.id
+    //         }
+    //     })
+    // }
 
-    const deejay = await prisma.character.findFirst({
-        where: {
-            name: "Dee Jay"
-        }
-    })
+    // const deejay = await prisma.character.findFirst({
+    //     where: {
+    //         name: "Dee Jay"
+    //     }
+    // })
 
-    if (deejay) {
-        await prisma.characterAltName.createMany({
-            data: [
-                { name: 'Deejay', characterId: deejay.id },
-                { name: 'Deejjay', characterId: deejay.id }
-            ]
-        })
-    }
+    // if (deejay) {
+    //     await prisma.characterAltName.createMany({
+    //         data: [
+    //             { name: 'Deejay', characterId: deejay.id },
+    //             { name: 'Deejjay', characterId: deejay.id }
+    //         ]
+    //     })
+    // }
+
+    // const jackO = await prisma.character.findFirst({
+    //     where: {
+    //         name: "Jack-O'"
+    //     }
+    // })
+
+    // if (jackO) {
+    //     await prisma.characterAltName.createMany({
+    //         data: [
+    //             { name: 'Jack-O', characterId: jackO.id }
+    //         ]
+    //     })
+    // }
+
+    // const bedman = await prisma.character.findFirst({
+    //     where: {
+    //         name: "Bedman?"
+    //     }
+    // })
+
+    // if (bedman) {
+    //     await prisma.characterAltName.createMany({
+    //         data: [
+    //             { name: 'Bedman', characterId: bedman.id }
+    //         ]
+    //     })
+    // }
+
 
 })();

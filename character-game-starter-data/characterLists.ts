@@ -21,14 +21,14 @@ export const marvel = [
     "Taskmaster", "Thor", "Wolverine", "X-23"
 ];
 
-// const strive = [
-//     'Sol', 'Ky', 'May', 'Axl',
-//     'Chipp', 'Potemkin', 'Faust', 'Millia',
-//     'Zato', 'Ramlethal', 'Leo', 'Nagoriyuki',
-//     'Giovanna', 'Anji', 'I-no', 'Goldlewis',
-//     "Jack-O'", 'Happy Chaos', 'Baiken', 'Testament',
-//     'Bridget', 'Sin', 'Bedman?', 'Asuka'
-// ]
+export const strive = [
+    'Sol', 'Ky', 'May', 'Axl',
+    'Chipp', 'Potemkin', 'Faust', 'Millia',
+    'Zato', 'Ramlethal', 'Leo', 'Nagoriyuki',
+    'Giovanna', 'Anji', 'I-no', 'Goldlewis',
+    "Jack-O'", 'Happy Chaos', 'Baiken', 'Testament',
+    'Bridget', 'Sin', 'Bedman?', 'Asuka'
+]
 
 // const dbfz = [
 //     'Andriod 16', 'Android 17', 'Android 18', 'Android 21', 'Android 21 (Lab Coat)', 'Bardock',
@@ -65,3 +65,4 @@ export const marvel = [
 //     'Terry', 'Byleth', 'Min Min'
 // ];
 
+export const characterLists = { sf6: sf6, marvel: marvel, strive: strive };

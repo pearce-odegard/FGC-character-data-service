@@ -23,7 +23,7 @@ model Game {
   id         Int          @id @default(autoincrement())
   createdAt  DateTime     @default(now())
   name       String       @unique
-  Character  Character[]
+  Characters Character[]
   Tournament Tournament[]
 }
 
