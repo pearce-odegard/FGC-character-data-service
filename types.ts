@@ -1,4 +1,4 @@
-import { Character, Game, PrismaClient, Team, Tournament } from "@prisma/client"
+import { Character, Game, PrismaClient, Tournament } from "@prisma/client"
 
 export type TourneyData = {
     title: string,
@@ -17,11 +17,6 @@ export type CharactersUsed = {
 export type TeamUsed = {
     [key: string]: number
 }
-
-// export type TallyFunctionMarvelResult = {
-//     charactersUsed: CharactersUsed,
-//     teamsUsed: TeamUsed[]
-// }
 
 export type TallyFunctions = {
     marvel: (

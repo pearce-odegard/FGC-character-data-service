@@ -28,16 +28,30 @@ const getCharacterById = async (prisma: PrismaClient, id: number) => {
 
 const getCharacterByGameIdAndNameOrNull = async (prisma: PrismaClient, id: number, name: string) => {
 
-    const character = await prisma.character.findFirst({
+    let character = await prisma.character.findFirst({
         where: {
             gameId: id,
             name: name
         }
     });
 
-    // Does not have a null check like others because we want can use the null value elsewhere
+    if (character) return character;
 
-    return character;
+    const characterAltName = await prisma.characterAltName.findFirst({
+        where: { name }
+    });
+
+    if (characterAltName) {
+        return await prisma.character.findUnique({
+            where: {
+                id: characterAltName.characterId
+            }
+        });
+    }
+
+    // Still can return null for use when checking if a character exists in the db
+
+    return null;
 }
 
 const getGameById = async (prisma: PrismaClient, id: number) => {
@@ -68,41 +82,51 @@ const getGameByName = async (prisma: PrismaClient, name: string) => {
 
 const saveTournament = async (prisma: PrismaClient, tourneyData: TourneyData, charactersUsed: CharactersUsed, teamsUsed: TeamUsed[]) => {
 
-    try {
-        const tournament = await prisma.tournament.create({
-            data: {
-                date: tourneyData.date,
-                title: tourneyData.title,
-                gameId: tourneyData.gameId,
-                url: tourneyData.url,
-                // come back to this when we know what teamsUsed will be
-                teamsUsed: {
-                    createMany: {
-                        data: teamsUsed
-                    }
-                },
-                CharactersOnTournaments: {
-                    createMany: {
-                        data: Object.values(charactersUsed)
-                    }
-                }
-            }
-        })
+    const tournament = await prisma.tournament.findFirst({
+        where: tourneyData
+    });
 
-        return tournament;
-
-    } catch (e) {
-        console.log("Tournament already exists in database");
-    } finally {
-        const tournament = await prisma.tournament.findFirst({
-            where: tourneyData
-        });
-
-        if (tournament == null) throw new Error(`INTERNAL SERVER ERROR: No tournament found with url ${tourneyData.url}`);
-
+    if (tournament) {
+        console.log(`Tournament ${tournament.url} ${tournament.title} already exists in db`)
         return tournament;
     }
 
+    const newTournament = await prisma.tournament.create({
+        data: {
+            date: tourneyData.date,
+            title: tourneyData.title,
+            gameId: tourneyData.gameId,
+            url: tourneyData.url,
+            CharactersOnTournaments: {
+                createMany: {
+                    data: Object.values(charactersUsed)
+                }
+            }
+        }
+    });
+
+    for (const team of teamsUsed) {
+        await prisma.tournament.update({
+            where: {
+                id: newTournament.id,
+            },
+            data: {
+                teamsUsed: {
+                    create: {
+                        characters: {
+                            connect: [
+                                { id: team.character1 },
+                                { id: team.character2 },
+                                { id: team.character3 },
+                            ]
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    return newTournament;
 }
 
 export const prismaWrapperFunctions = {

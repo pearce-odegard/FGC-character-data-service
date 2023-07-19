@@ -140,7 +140,9 @@ const autoScroll = async (page: Page) => {
 export const determineGameInVideo = (videoTitle: string) => {
     const normalizedTitle = videoTitle.toLowerCase();
     switch (true) {
-        case !normalizedTitle.includes('top 8'):
+        case !normalizedTitle.includes('top 8')
+            || normalizedTitle.includes("palette")
+            || normalizedTitle.includes("swap"):
             return 'Video not applicable!';
         case normalizedTitle.includes('umvc3'):
             return 'marvel';

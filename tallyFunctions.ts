@@ -1,5 +1,5 @@
-import { Character, Game, PrismaClient, Tournament } from "@prisma/client";
-import { CharactersUsed, TeamUsed } from "./types";
+import { Character, Game, PrismaClient } from "@prisma/client";
+import { CharactersUsed, TallyFunctions, TeamUsed } from "./types";
 
 const tallyFunctionMarvel = async (
     prisma: PrismaClient,
@@ -74,7 +74,28 @@ const tallyFunctionSF6 = (htmlElementArray: string[], characters: Character[]) =
     return charactersUsed;
 }
 
-export const tallyFunctions = {
+export const tallyFunctions: TallyFunctions = {
     marvel: tallyFunctionMarvel,
     sf6: tallyFunctionSF6
+}
+
+export const tallyCharactersUsed = async (
+    prisma: PrismaClient,
+    htmlElementArray: string[],
+    tallyFunctions: TallyFunctions,
+    game: Game,
+    characters: Character[],
+    characterFunction: (a: PrismaClient, b: number, c: string) => Promise<Character | null>
+): Promise<[CharactersUsed, TeamUsed[]]> => {
+
+    let charactersUsed: CharactersUsed = {};
+    let teamsUsed: TeamUsed[] = [];
+
+    if (game.name === 'marvel') {
+        [charactersUsed, teamsUsed] = await tallyFunctions.marvel(prisma, game, htmlElementArray, characterFunction);
+    } else if (game.name === 'sf6') {
+        charactersUsed = tallyFunctions.sf6(htmlElementArray, characters);
+    }
+
+    return [charactersUsed, teamsUsed];
 }
