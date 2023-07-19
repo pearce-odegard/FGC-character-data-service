@@ -1,7 +1,7 @@
 import { PrismaClient, Game, Character, Tournament } from "@prisma/client";
 import { CharactersUsed, TeamUsed, TourneyData } from "../types";
 import { getCharacterByGameIdAndNameOrNull, getCharacterById, getCharactersByGame, getGameById, getGameByName, saveTournament } from "./prismaWrapperFunctions";
-import { checkUniqueCharNamingMarvel, tallyFunctionMarvel, tallyFunctionSF6 } from "./tallyFunctions";
+import { checkUniqueCharNamingMarvel, tallyFunctionMarvel, tallyFunctionSF6, tallyFunctionStrive } from "./tallyFunctions";
 import { Page, Browser } from "puppeteer";
 import { TallyFunctions, PrismaWrapperFunctions, DetermineGameTitleFunction, WaitThenClick, ExecuteTallyFunction } from "./types";
 
@@ -17,6 +17,7 @@ export const prismaWrapperFunctions = {
 export const tallyFunctions = {
     marvel: tallyFunctionMarvel,
     sf6: tallyFunctionSF6,
+    strive: tallyFunctionStrive,
     checkUniqueCharNamingMarvel
 }
 
@@ -32,7 +33,7 @@ export const executeTallyFunction = async (
     let charactersUsed: CharactersUsed = {};
     let teamsUsed: TeamUsed[] = [];
 
-    if (game.name === 'marvel') {
+    if (game.name === 'umvc3') {
         [charactersUsed, teamsUsed] = await tallyFunctions.marvel(
             prisma,
             game,
@@ -42,6 +43,8 @@ export const executeTallyFunction = async (
         );
     } else if (game.name === 'sf6') {
         charactersUsed = await tallyFunctions.sf6(prisma, htmlElementArray, characters);
+    } else if (game.name === 'strive') {
+        charactersUsed = await tallyFunctions.strive(prisma, htmlElementArray, characters);
     }
 
     return [charactersUsed, teamsUsed];
@@ -91,13 +94,6 @@ export const scrapeCharactersUsed = async (
 
         const characters = await prismaWrapperFunctions.getCharactersByGame(prisma, currentGame.id);
 
-        const tourneyData: TourneyData = {
-            title: titleString,
-            gameId: currentGame.id,
-            url: videoUrl,
-            date: new Date(dateString)
-        };
-
         const [charactersUsed, teamsUsed] = await executeTallyFunction(
             prisma,
             descriptionArray,
@@ -106,6 +102,18 @@ export const scrapeCharactersUsed = async (
             characters,
             prismaWrapperFunctions.getCharacterByGameIdAndNameOrNull
         );
+
+        if (Object.keys(charactersUsed).length === 0) {
+            await page.close();
+            continue;
+        }
+
+        const tourneyData: TourneyData = {
+            title: titleString,
+            gameId: currentGame.id,
+            url: videoUrl,
+            date: new Date(dateString)
+        };
 
         const tournament: Tournament = await prismaWrapperFunctions.saveTournament(prisma, tourneyData, charactersUsed, teamsUsed);
 
@@ -128,9 +136,11 @@ export const determineGameInVideo = (videoTitle: string, games: Game[]) => {
         return 'Video not applicable!';
     }
 
-    gameNames.forEach(name => {
-        if (normalizedTitle.includes(name)) return name;
-    })
+    for (const name of gameNames) {
+        if (normalizedTitle.includes(name)) {
+            return name;
+        }
+    }
 
     return 'Video not applicable!';
 }

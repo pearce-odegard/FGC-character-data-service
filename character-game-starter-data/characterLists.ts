@@ -65,4 +65,4 @@ export const strive = [
 //     'Terry', 'Byleth', 'Min Min'
 // ];
 
-export const characterLists = { sf6: sf6, marvel: marvel, strive: strive };
+export const characterLists = { sf6: sf6, umvc3: marvel, strive: strive };

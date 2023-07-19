@@ -5,17 +5,17 @@ import { characterLists } from "./characterLists";
 
     const prisma = new PrismaClient();
 
-    // seed games
-    await prisma.game.createMany({
-        data: Object.keys(characterLists).map(name => {
-            return {
-                name: name
-            }
-        }),
-        skipDuplicates: true
-    });
+    // // seed games
+    // await prisma.game.createMany({
+    //     data: Object.keys(characterLists).map(name => {
+    //         return {
+    //             name: name
+    //         }
+    //     }),
+    //     skipDuplicates: true
+    // });
 
-    // seed characters
+    // // seed characters
     // for (const [name, arr] of Object.entries(characterLists)) {
     //     await prisma.game.update({
     //         where: {
@@ -33,7 +33,7 @@ import { characterLists } from "./characterLists";
     //     });
     // }
 
-    // seed alt character names
+    // // seed alt character names
     // const haggar = await prisma.character.findFirst({
     //     where: {
     //         name: "Haggar"
