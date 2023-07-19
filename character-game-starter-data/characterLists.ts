@@ -1,18 +1,16 @@
-import { PrismaClient } from "@prisma/client";
-
 // lists of characters in each game
-const sf6 = [
+export const sf6 = [
     'Luke', 'Blanka', 'Rashid', 'Cammy',
     'Lily', 'Zangief', 'JP', 'Marisa',
-    'Manon', 'Dee Jay', 'Deejay', 'Deejjay',
+    'Manon', 'Dee Jay',
     'Honda', 'Dhalsim', 'Ken', 'Juri',
     'Kimberly', 'Guile', 'Chun-Li', 'Jamie',
     'Ryu'
 ];
 
-const marvel = [
+export const marvel = [
     "Akuma", "Amaterasu", "Arthur", "C.Viper", "Chris", "Chun-Li",
-    "Dante", "Felicia", "Firebrand", "Frank", "Haggar", "Hagggar",
+    "Dante", "Felicia", "Firebrand", "Frank", "Haggar",
     "Hsien-Ko", "Jill", "Morrigan", "Nemesis", "Wright", "Ryu",
     "Spencer", "Strider", "Trish", "Tron", "Vergil", "Viewtiful", "Wesker", "Zero",
     "Captain", "Deadpool", "Doom", "Strange", "Dormammu",
@@ -67,11 +65,3 @@ const marvel = [
 //     'Terry', 'Byleth', 'Min Min'
 // ];
 
-// (async () => {
-
-//     const prisma = new PrismaClient();
-
-//     await prisma.game.createMany({
-
-//     })
-// })();
