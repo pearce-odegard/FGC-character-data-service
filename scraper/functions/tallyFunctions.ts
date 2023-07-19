@@ -1,6 +1,6 @@
 import { Character, Game, PrismaClient } from "@prisma/client";
 import { CharactersUsed, TeamUsed } from "../types";
-import { CheckUniqueCharNamingMarvel, PrismaWrapperFunctions } from "./types";
+import { CheckUniqueCharNamingMarvel, NextPrevious, PrismaWrapperFunctions } from "./types";
 
 export const tallyFunctionMarvel = async (
     prisma: PrismaClient,
@@ -32,7 +32,9 @@ export const tallyFunctionMarvel = async (
     for (const [i, word] of wordArray.entries()) {
         const maybeCharacter = await characterFunction(prisma, game.id, word);
 
-        const passesCheck = charNameCheck(word, wordArray[i + 1], wordArray[i - 1]);
+        const nextPrevious = { next: wordArray[i + 1], previous: wordArray[i - 1] };
+
+        const passesCheck = charNameCheck(word, nextPrevious);
 
         if (maybeCharacter && passesCheck) {
             charactersUsed[word] = charactersUsed[word] || { characterId: maybeCharacter.id, characterUses: 0 };
@@ -89,21 +91,21 @@ export const tallyFunctionSF6 = async (prisma: PrismaClient, htmlElementArray: s
     return charactersUsed;
 }
 
-export const checkUniqueCharNamingMarvel = (current: string, next: string, previous: string) => {
-    switch (true) {
-        case current === 'Ghost':
-            return next === 'Rider';
-        case current === 'Man':
-            return previous === 'Iron';
-        case current === 'Fist':
-            return previous === 'Iron';
-        case current === 'Captain':
-            return next === 'America'
-        case current === 'Rocket':
-            return next === 'Raccoon'
-        default:
-            return true;
+export const checkUniqueCharNamingMarvel = (current: string, obj: NextPrevious) => {
+
+    const names = ['Ghost', 'Man', 'Fist', 'Captain', 'Rocket'];
+    const checks = ['Rider', 'Iron', 'Iron', 'America', 'Raccoon'];
+    const nextPreviousArr = ['next', 'previous', 'previous', 'next', 'previous'];
+
+    if (!names.includes(current)) {
+        return true;
     }
+
+    for (let i = 0; i < names.length; i++) {
+        if (current === names[i]) {
+            return obj[nextPreviousArr[i]] === checks[i];
+        }
+    }
+
+    return true;
 }
-
-

@@ -71,7 +71,7 @@ export const scrapeCharactersUsed = async (
 
         const allGames = await prisma.game.findMany();
 
-        const gameTitle: string = determineGameTitleFunction(titleString, allGames);
+        const gameTitle = determineGameTitleFunction(titleString, allGames);
 
         if (gameTitle === 'Video not applicable!') {
             await page.close();

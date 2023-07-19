@@ -12,3 +12,7 @@ export type DetermineGameTitleFunction = typeof determineGameInVideo;
 export type CheckUniqueCharNamingMarvel = typeof checkUniqueCharNamingMarvel;
 
 export type WaitThenClick = typeof waitThenClick;
+
+export type NextPrevious = {
+    [key: string]: string
+}
