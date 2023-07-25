@@ -9,7 +9,8 @@ import { characterLists } from "./characterLists";
     // await prisma.game.createMany({
     //     data: Object.keys(characterLists).map(name => {
     //         return {
-    //             name: name
+    //             name: name,
+    //             isTeamGame: name === 'umvc3'
     //         }
     //     }),
     //     skipDuplicates: true
@@ -91,6 +92,20 @@ import { characterLists } from "./characterLists";
     //         ]
     //     })
     // }
+
+    const zato = await prisma.character.findFirst({
+        where: {
+            name: "Zato"
+        }
+    })
+
+    if (zato) {
+        await prisma.characterAltName.createMany({
+            data: [
+                { name: 'Zato-1', characterId: zato.id }
+            ]
+        })
+    }
 
 
 })();

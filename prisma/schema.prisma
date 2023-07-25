@@ -25,6 +25,7 @@ model Game {
   name       String       @unique
   Characters Character[]
   Tournament Tournament[]
+  isTeamGame Boolean
 }
 
 model Character {

@@ -2,12 +2,11 @@ import { Character, Game, PrismaClient } from "@prisma/client";
 import { CharactersUsed, TeamUsed } from "../types";
 import { CheckUniqueCharNamingMarvel, NextPrevious, PrismaWrapperFunctions } from "./types";
 
-export const tallyFunctionMarvel = async (
+export const tallyCharactersUsed = async (
     prisma: PrismaClient,
     game: Game,
     htmlElementArray: string[],
-    characterFunction: PrismaWrapperFunctions['getCharacterByGameIdAndNameOrNull'],
-    charNameCheck: CheckUniqueCharNamingMarvel
+    getCharacterFunction: PrismaWrapperFunctions['getCharacterByGameIdAndNameOrNull']
 ): Promise<[CharactersUsed, TeamUsed[]]> => {
 
     const charactersUsed: CharactersUsed = {};
@@ -15,7 +14,7 @@ export const tallyFunctionMarvel = async (
     const teamsUsed: TeamUsed[] = [];
 
     const filteredMatchups = htmlElementArray.filter((elementText) => {
-        return elementText.includes('vs');
+        return elementText.includes('vs') || elementText.includes('Losers') && elementText.includes('Quarter');
     });
 
     // RegEx string matching solution
@@ -24,17 +23,19 @@ export const tallyFunctionMarvel = async (
     // besides winners and losers round 1 of top 8, then mashing it all into one big string, 
     // removing any parentheses, commas, periods, etc...
     // and splitting it back into an array of individual words
-    const wordArray = filteredMatchups.slice(0, 4).join("").replace(/(\(|\)|\,|\.|\-)/gm, '').split(" ");
+    const wordArray = filteredMatchups.slice(-6).join("").replace(/(\(|\)|\,|\.)/gm, '').split(" ");
+
+    console.log(wordArray);
 
     let teamCounter = 1;
     let newTeam: TeamUsed = {};
 
     for (const [i, word] of wordArray.entries()) {
-        const maybeCharacter = await characterFunction(prisma, game.id, word);
+        const maybeCharacter = await getCharacterFunction(prisma, game.id, word);
 
         const nextPrevious = { next: wordArray[i + 1], previous: wordArray[i - 1] };
 
-        const passesCheck = charNameCheck(word, nextPrevious);
+        const passesCheck = checkUniqueCharNaming(word, nextPrevious);
 
         if (maybeCharacter && passesCheck) {
             charactersUsed[word] = charactersUsed[word] || { characterId: maybeCharacter.id, characterUses: 0 };
@@ -43,7 +44,7 @@ export const tallyFunctionMarvel = async (
             teamCounter += 1;
         }
 
-        if (teamCounter > 3) {
+        if (game.isTeamGame && teamCounter > 3) {
             teamsUsed.push(newTeam);
             newTeam = {};
             teamCounter = 1;
@@ -51,6 +52,46 @@ export const tallyFunctionMarvel = async (
     }
 
     return [charactersUsed, teamsUsed];
+}
+
+export const tallyFunctionSolo = async (
+    prisma: PrismaClient,
+    game: Game,
+    htmlElementArray: string[],
+    getCharacterFunction: PrismaWrapperFunctions['getCharacterByGameIdAndNameOrNull'],
+    charNameCheck: CheckUniqueCharNamingMarvel
+): Promise<[CharactersUsed, TeamUsed[]]> => {
+
+    const charactersUsed: CharactersUsed = {};
+
+    const filteredMatchups = htmlElementArray.filter((elementText) => {
+        return elementText.includes('vs') || elementText.includes('Losers') && elementText.includes('Quarter');
+    });
+
+    // RegEx string matching solution
+
+    // Starting by slicing the first 4 elements so as not to include any matchups
+    // besides winners and losers round 1 of top 8, then mashing it all into one big string, 
+    // removing any parentheses, commas, periods, etc...
+    // and splitting it back into an array of individual words
+    const wordArray = filteredMatchups.slice(-6).join("").replace(/(\(|\)|\,|\.|\-)/gm, '').split(" ");
+
+    console.log(wordArray);
+
+    for (const [i, word] of wordArray.entries()) {
+        const maybeCharacter = await getCharacterFunction(prisma, game.id, word);
+
+        const nextPrevious = { next: wordArray[i + 1], previous: wordArray[i - 1] };
+
+        const passesCheck = charNameCheck(word, nextPrevious);
+
+        if (maybeCharacter && passesCheck) {
+            charactersUsed[word] = charactersUsed[word] || { characterId: maybeCharacter.id, characterUses: 0 };
+            charactersUsed[word].characterUses += 1;
+        }
+    }
+
+    return [charactersUsed, []];
 }
 
 export const tallyFunctionSF6 = async (prisma: PrismaClient, htmlElementArray: string[], characters: Character[]) => {
@@ -98,10 +139,10 @@ export const tallyFunctionStrive = async (prisma: PrismaClient, htmlElementArray
     const charactersUsed: CharactersUsed = {};
 
     // This solution varies from the SF6 solution because Strive videos often include pools alongside Top 8s,
-    // so instead we need to look for the span than contains "Losers Quarters" or some variation, then grab
+    // so instead we need to look for the span that contains "Losers Quarters" or some variation, then grab
     // the 4 matchups before losers quarters (winners semis, and losers eighths)
     // This slices last 6 elements because 'Losers Quarters' gets added twice at the end
-    const matchupsString = filteredMatchups.slice(-6).join("").replace(/(\(|\)|\,|\.|\-)/gm, '');
+    const matchupsString = filteredMatchups.slice(-6).join("");
 
     if (!matchupsString.includes('Losers Quarter')) return charactersUsed;
 
@@ -112,9 +153,10 @@ export const tallyFunctionStrive = async (prisma: PrismaClient, htmlElementArray
             }
         });
 
-        let regExString = character.name;
+        // looking for characters that specifically in parentheses
+        let regExString = `\\(${character.name}\\)`;
 
-        if (charAltNames.length > 0) charAltNames.forEach(obj => regExString += `|${obj.name}`);
+        if (charAltNames.length > 0) charAltNames.forEach(obj => regExString += `|\\(${obj.name}\\)`);
 
         const numberOfUses = (matchupsString.match(new RegExp(regExString, 'g')) || []).length;
 
@@ -129,7 +171,7 @@ export const tallyFunctionStrive = async (prisma: PrismaClient, htmlElementArray
     return charactersUsed;
 }
 
-export const checkUniqueCharNamingMarvel = (current: string, obj: NextPrevious) => {
+export const checkUniqueCharNaming = (current: string, obj: NextPrevious) => {
 
     const names = ['Ghost', 'Man', 'Fist', 'Captain', 'Rocket'];
     const checks = ['Rider', 'Iron', 'Iron', 'America', 'Raccoon'];
