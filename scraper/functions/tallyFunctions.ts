@@ -1,6 +1,5 @@
 import { Game, PrismaClient } from "@prisma/client";
-import { CharactersUsed, TeamUsed } from "../types";
-import { NextPrevious, PrismaWrapperFunctions } from "./types";
+import { CharactersUsed, NextPrevious, PrismaWrapperFunctions, TeamUsed } from "./types";
 
 export const tallyCharactersUsed = async (
     prisma: PrismaClient,
@@ -54,7 +53,7 @@ export const tallyCharactersUsed = async (
     return [charactersUsed, teamsUsed];
 }
 
-export const checkUniqueCharNaming = (current: string, obj: NextPrevious) => {
+const checkUniqueCharNaming = (current: string, obj: NextPrevious) => {
 
     const names = ['Ghost', 'Man', 'Fist', 'Captain', 'Rocket', 'Happy'];
     const checks = ['Rider', 'Iron', 'Iron', 'America', 'Raccoon', 'Chaos'];

@@ -1,5 +1,5 @@
 import { Character, PrismaClient } from "@prisma/client";
-import { CharactersUsed, TeamUsed, TourneyData } from "../types";
+import { CharactersUsed, TeamUsed, TourneyData } from "./types";
 
 export const getCharactersByGame = async (prisma: PrismaClient, gameId: number) => {
 

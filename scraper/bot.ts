@@ -13,17 +13,17 @@ const prisma = new PrismaClient();
 (async () => {
     const browser = await puppeteer.launch({ headless: "new" });
 
-    const videoList = (await prisma.videoURL.findMany()).map(obj => obj.url);
+    const videoUrlList = (await prisma.videoURL.findMany()).map(obj => obj.url);
 
-    const tournaments = await scrapeCharactersUsed(
-        videoList,
-        tallyCharactersUsed,
+    const tournaments = await scrapeCharactersUsed({
+        videoUrlList,
+        tallyFunction: tallyCharactersUsed,
         prismaWrapperFunctions,
-        determineGameInVideo,
+        determineGameTitleFunction: determineGameInVideo,
         waitThenClick,
         browser,
         prisma
-    );
+    });
 
     console.log(tournaments.length);
 
