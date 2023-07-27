@@ -5,8 +5,13 @@ puppeteer.use(StealthPlugin());
 puppeteer.use(AdBlockerPlugin());
 
 import { PrismaClient } from '@prisma/client';
-import { scrapeCharactersUsed, prismaWrapperFunctions, determineGameInVideo, waitThenClick } from "./functions";
-import { tallyCharactersUsed } from "./functions/tallyFunctions";
+import {
+    scrapeCharactersUsed,
+    prismaWrapperFunctions,
+    determineGameInVideo,
+    waitThenClick,
+    tallyCharactersUsed
+} from "./functions";
 
 const prisma = new PrismaClient();
 

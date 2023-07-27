@@ -6,7 +6,8 @@
   "scripts": {
     "scrape-data": "ts-node scraper/bot.ts",
     "scrape-urls": "ts-node url-scraper/bot.ts",
-    "seed-db": "ts-node character-game-starter-data/seed.ts"
+    "seed-db": "ts-node character-game-starter-data/seed.ts",
+    "lint": "eslint src/**/*.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +23,10 @@
   },
   "devDependencies": {
     "@types/puppeteer": "^7.0.4",
+    "@typescript-eslint/eslint-plugin": "^6.2.0",
+    "@typescript-eslint/parser": "^6.2.0",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0",
     "prisma": "^5.0.0"
   }
 }

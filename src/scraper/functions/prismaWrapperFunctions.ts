@@ -27,7 +27,7 @@ export const getCharacterById = async (prisma: PrismaClient, id: number) => {
 
 export const getCharacterByGameIdAndNameOrNull = async (prisma: PrismaClient, id: number, name: string) => {
 
-    let character = await prisma.character.findFirst({
+    const character = await prisma.character.findFirst({
         where: {
             gameId: id,
             name: name
