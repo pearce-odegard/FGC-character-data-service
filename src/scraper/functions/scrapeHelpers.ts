@@ -1,7 +1,7 @@
 import { Game } from "@prisma/client";
 import { Page } from "puppeteer";
 
-export const determineGameInVideo = (videoTitle: string, games: Game[]) => {
+export const determineGameInVideo = (videoTitle: string, games: Game[]): string => {
     const normalizedTitle = videoTitle.toLowerCase();
     const gameNames = games.map(game => game.name);
 

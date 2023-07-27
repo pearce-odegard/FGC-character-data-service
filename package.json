@@ -1,5 +1,5 @@
 {
-  "name": "autocreditcard",
+  "name": "fgc-char-variety-scrapers",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,7 +10,7 @@
     "lint": "eslint src/**/*.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "Pearce Odegard",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.0.0",
