@@ -1,9 +1,9 @@
-import { PrismaClient, Game, Character, Tournament } from "@prisma/client";
-import { CharactersUsed, TeamUsed, TourneyData } from "../types";
+import { PrismaClient, Game, Tournament } from "@prisma/client";
+import { TourneyData } from "../types";
 import { getCharacterByGameIdAndNameOrNull, getCharacterById, getCharactersByGame, getGameById, getGameByName, saveTournament } from "./prismaWrapperFunctions";
-import { tallyCharactersUsed, tallyFunctionSF6, tallyFunctionSolo, tallyFunctionStrive } from "./tallyFunctions";
+import { tallyCharactersUsed } from "./tallyFunctions";
 import { Page, Browser } from "puppeteer";
-import { TallyFunctions, PrismaWrapperFunctions, DetermineGameTitleFunction, WaitThenClick, ExecuteTallyFunction } from "./types";
+import { PrismaWrapperFunctions, DetermineGameTitleFunction, WaitThenClick } from "./types";
 
 export const prismaWrapperFunctions = {
     getCharactersByGame,
@@ -13,11 +13,6 @@ export const prismaWrapperFunctions = {
     getGameByName,
     saveTournament
 }
-
-// export const tallyFunctions = {
-//     team: tallyFunctionTeam,
-//     solo: tallyFunctionSolo
-// }
 
 export const scrapeCharactersUsed = async (
     videoUrlList: string[],
@@ -110,14 +105,6 @@ export const determineGameInVideo = (videoTitle: string, games: Game[]) => {
 
     return 'Video not applicable!';
 }
-
-// } else if (normalizedTitle.includes('ssbu') || normalizedTitle.includes('smash') && normalizedTitle.includes('ultimate')) {
-//     return 'ssbu';
-//     DBFZ is annoying because of variations of goku, gohan, etc. Will look at potential solution later
-//     else if (normalizedTitle.includes('dbfz') || normalizedTitle.includes('fighter') && normalizedTitle.includes('z')) {
-//          return 'dbfz';
-//     }
-//     Strive is also causing issues because entire tournaments are being posted as single videos, rather than being split into waves
 
 export const waitThenClick = async (selector: string, page: Page, clicks = 1) => {
     await page.waitForSelector(selector);

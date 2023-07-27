@@ -1,6 +1,6 @@
-import { Character, Game, PrismaClient } from "@prisma/client";
+import { Game, PrismaClient } from "@prisma/client";
 import { CharactersUsed, TeamUsed } from "../types";
-import { CheckUniqueCharNamingMarvel, NextPrevious, PrismaWrapperFunctions } from "./types";
+import { NextPrevious, PrismaWrapperFunctions } from "./types";
 
 export const tallyCharactersUsed = async (
     prisma: PrismaClient,
@@ -54,128 +54,11 @@ export const tallyCharactersUsed = async (
     return [charactersUsed, teamsUsed];
 }
 
-export const tallyFunctionSolo = async (
-    prisma: PrismaClient,
-    game: Game,
-    htmlElementArray: string[],
-    getCharacterFunction: PrismaWrapperFunctions['getCharacterByGameIdAndNameOrNull'],
-    charNameCheck: CheckUniqueCharNamingMarvel
-): Promise<[CharactersUsed, TeamUsed[]]> => {
-
-    const charactersUsed: CharactersUsed = {};
-
-    const filteredMatchups = htmlElementArray.filter((elementText) => {
-        return elementText.includes('vs') || elementText.includes('Losers') && elementText.includes('Quarter');
-    });
-
-    // RegEx string matching solution
-
-    // Starting by slicing the first 4 elements so as not to include any matchups
-    // besides winners and losers round 1 of top 8, then mashing it all into one big string, 
-    // removing any parentheses, commas, periods, etc...
-    // and splitting it back into an array of individual words
-    const wordArray = filteredMatchups.slice(-6).join("").replace(/(\(|\)|\,|\.|\-)/gm, '').split(" ");
-
-    console.log(wordArray);
-
-    for (const [i, word] of wordArray.entries()) {
-        const maybeCharacter = await getCharacterFunction(prisma, game.id, word);
-
-        const nextPrevious = { next: wordArray[i + 1], previous: wordArray[i - 1] };
-
-        const passesCheck = charNameCheck(word, nextPrevious);
-
-        if (maybeCharacter && passesCheck) {
-            charactersUsed[word] = charactersUsed[word] || { characterId: maybeCharacter.id, characterUses: 0 };
-            charactersUsed[word].characterUses += 1;
-        }
-    }
-
-    return [charactersUsed, []];
-}
-
-export const tallyFunctionSF6 = async (prisma: PrismaClient, htmlElementArray: string[], characters: Character[]) => {
-    const filteredMatchups = htmlElementArray.filter((elementText) => {
-        return elementText.includes('vs');
-    });
-    const charactersUsed: CharactersUsed = {};
-
-    // RegEx string matching solution
-
-    // Starting by slicing the first 4 elements so as not to include any other matchups
-    // than winners and losers round 1 of top 8, then mashing it all into one big string (excluding any parentheses, commas, periods, etc)
-    // to be searched
-    const matchupsString = filteredMatchups.slice(0, 4).join("").replace(/(\(|\)|\,|\.|\-)/gm, '');
-
-    for (const character of characters) {
-        const charAltNames = await prisma.characterAltName.findMany({
-            where: {
-                characterId: character.id
-            }
-        });
-
-        let regExString = character.name;
-
-        if (charAltNames.length > 0) charAltNames.forEach(obj => regExString += `|${obj.name}`);
-
-        const numberOfUses = (matchupsString.match(new RegExp(regExString, 'g')) || []).length;
-
-        if (numberOfUses > 0) {
-            charactersUsed[character.name] = {
-                characterId: character.id,
-                characterUses: numberOfUses
-            };
-        }
-    }
-
-    return charactersUsed;
-}
-
-export const tallyFunctionStrive = async (prisma: PrismaClient, htmlElementArray: string[], characters: Character[]) => {
-    const filteredMatchups = htmlElementArray.filter((elementText) => {
-        return elementText.includes('vs') || elementText.includes('Losers') && elementText.includes('Quarter');
-    });
-
-    const charactersUsed: CharactersUsed = {};
-
-    // This solution varies from the SF6 solution because Strive videos often include pools alongside Top 8s,
-    // so instead we need to look for the span that contains "Losers Quarters" or some variation, then grab
-    // the 4 matchups before losers quarters (winners semis, and losers eighths)
-    // This slices last 6 elements because 'Losers Quarters' gets added twice at the end
-    const matchupsString = filteredMatchups.slice(-6).join("");
-
-    if (!matchupsString.includes('Losers Quarter')) return charactersUsed;
-
-    for (const character of characters) {
-        const charAltNames = await prisma.characterAltName.findMany({
-            where: {
-                characterId: character.id
-            }
-        });
-
-        // looking for characters that specifically in parentheses
-        let regExString = `\\(${character.name}\\)`;
-
-        if (charAltNames.length > 0) charAltNames.forEach(obj => regExString += `|\\(${obj.name}\\)`);
-
-        const numberOfUses = (matchupsString.match(new RegExp(regExString, 'g')) || []).length;
-
-        if (numberOfUses > 0) {
-            charactersUsed[character.name] = {
-                characterId: character.id,
-                characterUses: numberOfUses
-            };
-        }
-    }
-
-    return charactersUsed;
-}
-
 export const checkUniqueCharNaming = (current: string, obj: NextPrevious) => {
 
-    const names = ['Ghost', 'Man', 'Fist', 'Captain', 'Rocket'];
-    const checks = ['Rider', 'Iron', 'Iron', 'America', 'Raccoon'];
-    const nextPreviousArr = ['next', 'previous', 'previous', 'next', 'previous'];
+    const names = ['Ghost', 'Man', 'Fist', 'Captain', 'Rocket', 'Happy'];
+    const checks = ['Rider', 'Iron', 'Iron', 'America', 'Raccoon', 'Chaos'];
+    const nextPreviousArr = ['next', 'previous', 'previous', 'next', 'previous', 'next'];
 
     if (!names.includes(current)) {
         return true;

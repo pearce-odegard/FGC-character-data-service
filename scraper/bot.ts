@@ -11,7 +11,7 @@ import { tallyCharactersUsed } from "./functions/tallyFunctions";
 const prisma = new PrismaClient();
 
 (async () => {
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ headless: "new" });
 
     const videoList = (await prisma.videoURL.findMany()).map(obj => obj.url);
 
