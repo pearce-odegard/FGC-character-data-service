@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "scrape-data": "ts-node scraper/bot.ts",
-    "scrape-urls": "ts-node url-scraper/bot.ts",
-    "seed-db": "ts-node character-game-starter-data/seed.ts",
+    "scrape-data": "ts-node src/scraper/bot.ts",
+    "scrape-urls": "ts-node src/url-scraper/bot.ts",
+    "seed-db": "ts-node src/character-game-starter-data/seed.ts",
     "lint": "eslint src/**/*.ts"
   },
   "keywords": [],
@@ -15,7 +15,6 @@
   "dependencies": {
     "@prisma/client": "^5.0.0",
     "dotenv": "^16.3.1",
-    "nodemon": "^3.0.1",
     "puppeteer": "^20.7.3",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-adblocker": "^2.13.6",

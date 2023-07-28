@@ -1,12 +1,11 @@
-import { Game, PrismaClient } from "@prisma/client";
-import { CharactersUsed, NextPrevious, PrismaWrapperFunctions, TeamUsed } from "./types";
+import { CharactersUsed, NextPrevious, TallyCharactersUsedParams, TeamUsed } from "./types";
 
-export const tallyCharactersUsed = async (
-    prisma: PrismaClient,
-    game: Game,
-    htmlElementArray: string[],
-    getCharacterFunction: PrismaWrapperFunctions['getCharacterByGameIdAndNameOrNull']
-): Promise<[CharactersUsed, TeamUsed[]]> => {
+export const tallyCharactersUsed = async ({
+    prisma,
+    game,
+    htmlElementArray,
+    getCharacterFunction
+}: TallyCharactersUsedParams): Promise<[CharactersUsed, TeamUsed[]]> => {
 
     const charactersUsed: CharactersUsed = {};
 

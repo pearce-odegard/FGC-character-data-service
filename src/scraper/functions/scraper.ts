@@ -49,14 +49,16 @@ export const scrapeCharactersUsed = async ({
             return spans.map(span => (span.textContent ?? "").slice(0, -2));
         })
 
+        console.log(descriptionSpanArray);
+
         const currentGame = allGames.filter(game => game.name === gameTitle)[0];
 
-        const [charactersUsed, teamsUsed] = await tallyFunction(
+        const [charactersUsed, teamsUsed] = await tallyFunction({
             prisma,
-            currentGame,
-            descriptionSpanArray,
-            prismaWrapperFunctions.getCharacterByGameIdAndNameOrNull
-        );
+            game: currentGame,
+            htmlElementArray: descriptionSpanArray,
+            getCharacterFunction: prismaWrapperFunctions.getCharacterByGameIdAndNameOrNull
+        });
 
         if (Object.keys(charactersUsed).length === 0) {
             await page.close();

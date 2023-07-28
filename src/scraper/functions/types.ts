@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Game, PrismaClient } from "@prisma/client";
 import { Browser } from "puppeteer";
 import { tallyCharactersUsed } from "./tallyFunctions";
 import { determineGameInVideo, waitThenClick } from "./scrapeHelpers";
@@ -22,6 +22,13 @@ export interface ScrapeCharactersUsedParams {
     waitThenClick: WaitThenClick;
     browser: Browser;
     prisma: PrismaClient;
+}
+
+export interface TallyCharactersUsedParams {
+    prisma: PrismaClient,
+    game: Game,
+    htmlElementArray: string[],
+    getCharacterFunction: PrismaWrapperFunctions['getCharacterByGameIdAndNameOrNull']
 }
 
 export interface TourneyData {
