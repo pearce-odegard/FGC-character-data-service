@@ -4,7 +4,7 @@ import AdBlockerPlugin from 'puppeteer-extra-plugin-adblocker';
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdBlockerPlugin());
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Tournament } from '@prisma/client';
 import {
     scrapeCharactersUsed,
     prismaWrapperFunctions,
@@ -20,17 +20,25 @@ const prisma = new PrismaClient();
 
     const videoUrlList = (await prisma.videoURL.findMany()).map(obj => obj.url);
 
-    const tournaments = await scrapeCharactersUsed({
+    const tourneyDataObjs = await scrapeCharactersUsed({
         videoUrlList,
-        tallyFunction: tallyCharactersUsed,
-        prismaWrapperFunctions,
         determineGameTitleFunction: determineGameInVideo,
         waitThenClick,
         browser,
         prisma
     });
 
-    console.log(tournaments.length);
+    for (const tourneyData of tourneyDataObjs) {
+        const [charactersUsed, teamsUsed] = await tallyCharactersUsed({
+            prisma,
+            tourneyData,
+            getCharacterFunction: prismaWrapperFunctions.getCharacterByGameIdAndNameOrNull
+        });
+
+        const newTournament: Tournament = await prismaWrapperFunctions.saveTournament(prisma, tourneyData, charactersUsed, teamsUsed);
+
+        console.log(newTournament);
+    }
 
     await browser.close();
 })();

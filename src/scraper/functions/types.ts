@@ -16,8 +16,6 @@ export interface NextPrevious {
 
 export interface ScrapeCharactersUsedParams {
     videoUrlList: string[];
-    tallyFunction: typeof tallyCharactersUsed;
-    prismaWrapperFunctions: PrismaWrapperFunctions;
     determineGameTitleFunction: DetermineGameTitleFunction;
     waitThenClick: WaitThenClick;
     browser: Browser;
@@ -26,8 +24,7 @@ export interface ScrapeCharactersUsedParams {
 
 export interface TallyCharactersUsedParams {
     prisma: PrismaClient,
-    game: Game,
-    htmlElementArray: string[],
+    tourneyData: TourneyData,
     getCharacterFunction: PrismaWrapperFunctions['getCharacterByGameIdAndNameOrNull']
 }
 
@@ -36,6 +33,7 @@ export interface TourneyData {
     gameId: number;
     date: Date;
     url: string;
+    descriptionSpanArray: string[];
 }
 
 export interface CharactersUsed {

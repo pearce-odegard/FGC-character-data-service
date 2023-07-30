@@ -3,15 +3,13 @@ import { ScrapeCharactersUsedParams, TourneyData } from "./types";
 
 export const scrapeCharactersUsed = async ({
     videoUrlList,
-    tallyFunction,
-    prismaWrapperFunctions,
     determineGameTitleFunction,
     waitThenClick,
     browser,
     prisma,
-}: ScrapeCharactersUsedParams): Promise<Tournament[]> => {
+}: ScrapeCharactersUsedParams): Promise<TourneyData[]> => {
 
-    const tournaments: Tournament[] = [];
+    const tournaments: TourneyData[] = [];
 
     for (const videoUrl of videoUrlList) {
         const page = await browser.newPage();
@@ -44,40 +42,26 @@ export const scrapeCharactersUsed = async ({
 
         await waitThenClick('tp-yt-paper-button#expand', page);
 
-        const descriptionSpanArray = await page.$$eval('span.yt-core-attributed-string--link-inherit-color', spans => {
-            // the slice method eliminates pesky line breaks
-            return spans.map(span => (span.textContent ?? "").slice(0, -2));
-        })
-
-        console.log(descriptionSpanArray);
+        const dateString = await page.$eval('yt-formatted-string#info', info => info.children[2].textContent) ?? "";
 
         const currentGame = allGames.filter(game => game.name === gameTitle)[0];
 
-        const [charactersUsed, teamsUsed] = await tallyFunction({
-            prisma,
-            game: currentGame,
-            htmlElementArray: descriptionSpanArray,
-            getCharacterFunction: prismaWrapperFunctions.getCharacterByGameIdAndNameOrNull
+        const descriptionSpanArray = await page.$$eval('span.yt-core-attributed-string--link-inherit-color', spans => {
+            // the slice method eliminates pesky line breaks
+            return spans.map(span => (span.textContent ?? ""));
         });
 
-        if (Object.keys(charactersUsed).length === 0) {
-            await page.close();
-            continue;
-        }
-
-        const dateString = await page.$eval('yt-formatted-string#info', info => info.children[2].textContent) ?? "";
+        console.log(descriptionSpanArray);
 
         const tourneyData: TourneyData = {
             title: titleString,
             gameId: currentGame.id,
             url: videoUrl,
-            date: new Date(dateString)
+            date: new Date(dateString),
+            descriptionSpanArray
         };
 
-        const newTournament: Tournament = await prismaWrapperFunctions.saveTournament(prisma, tourneyData, charactersUsed, teamsUsed);
-
-        console.log(newTournament);
-        tournaments.push(newTournament);
+        tournaments.push(tourneyData);
 
         await page.close();
     }

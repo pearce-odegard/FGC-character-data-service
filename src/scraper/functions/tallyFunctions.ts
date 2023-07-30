@@ -2,8 +2,7 @@ import { CharactersUsed, NextPrevious, TallyCharactersUsedParams, TeamUsed } fro
 
 export const tallyCharactersUsed = async ({
     prisma,
-    game,
-    htmlElementArray,
+    tourneyData,
     getCharacterFunction
 }: TallyCharactersUsedParams): Promise<[CharactersUsed, TeamUsed[]]> => {
 
@@ -11,7 +10,7 @@ export const tallyCharactersUsed = async ({
 
     const teamsUsed: TeamUsed[] = [];
 
-    const filteredMatchups = htmlElementArray.filter((elementText) => {
+    const filteredMatchups = tourneyData.descriptionSpanArray.filter((elementText) => {
         return elementText.includes('vs') || elementText.includes('Losers') && elementText.includes('Quarter');
     });
 
@@ -29,7 +28,7 @@ export const tallyCharactersUsed = async ({
     let newTeam: TeamUsed = {};
 
     for (const [i, word] of wordArray.entries()) {
-        const maybeCharacter = await getCharacterFunction(prisma, game.id, word);
+        const maybeCharacter = await getCharacterFunction(prisma, tourneyData.gameId, word);
 
         const nextPrevious = { next: wordArray[i + 1], previous: wordArray[i - 1] };
 
@@ -42,11 +41,11 @@ export const tallyCharactersUsed = async ({
             teamCounter += 1;
         }
 
-        if (game.isTeamGame && teamCounter > 3) {
-            teamsUsed.push(newTeam);
-            newTeam = {};
-            teamCounter = 1;
-        }
+        // if (tourneyData.game.isTeamGame && teamCounter > 3) {
+        //     teamsUsed.push(newTeam);
+        //     newTeam = {};
+        //     teamCounter = 1;
+        // }
     }
 
     return [charactersUsed, teamsUsed];
