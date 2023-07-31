@@ -6,7 +6,9 @@
   "scripts": {
     "fetch": "ts-node src/youtube-api/youtube-api-test.ts",
     "seed-db": "ts-node src/character-game-starter-data/seed.ts",
-    "lint": "eslint src/**/*.ts"
+    "scrape-urls": "ts-node src/url-scraper/bot.ts",
+    "lint": "eslint src/**/*.ts",
+    "lint-fix": "eslint --fix src/**/*.ts"
   },
   "keywords": [],
   "author": "Pearce Odegard",

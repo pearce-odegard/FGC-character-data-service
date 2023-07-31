@@ -21,7 +21,8 @@ const prisma = new PrismaClient();
     await prisma.videoURL.createMany({
         data: videoList.map(url => {
             return { url };
-        })
+        }),
+        skipDuplicates: true
     });
 
     await browser.close();

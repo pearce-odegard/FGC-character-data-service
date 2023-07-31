@@ -1,19 +1,21 @@
 import axios from "axios";
-import { ZodError, z } from 'zod';
+import { z } from 'zod';
 // import { backOff } from "exponential-backoff";
 
 const VideoSchema = z.object({
     id: z.string(),
     snippet: z.object({
-        description: z.string()
+        title: z.string(),
+        channelId: z.string(),
+        publishedAt: z.string().datetime(),
+        description: z.string(),
     }),
 });
 
 type VideoObj = z.infer<typeof VideoSchema>;
 
 const QueryResultSchema = z.object({
-    items: VideoSchema.array(),
-    nextPageToken: z.string().optional()
+    items: VideoSchema.array()
 })
 
 export async function fetchAllVideoData(apiKey: string, videoIds: string[]): Promise<VideoObj[]> {
@@ -28,7 +30,6 @@ export async function fetchAllVideoData(apiKey: string, videoIds: string[]): Pro
             const videoIdsString = batchVideoIds.join(',');
 
             const url: string = `${baseEndpoint}?part=snippet&id=${videoIdsString}&key=${apiKey}`;
-            console.log(url)
             const response = await axios.get(url);
             const queryResult = QueryResultSchema.parse(response.data);
 
@@ -41,6 +42,6 @@ export async function fetchAllVideoData(apiKey: string, videoIds: string[]): Pro
         return allVideos;
     } catch (error) {
         if (axios.isAxiosError(error)) throw new Error('Failed to fetch videos from the channel: ' + error.message);
-        else throw error;
+        else throw new Error("Unknown error: " + (error as Error).message);
     }
 }

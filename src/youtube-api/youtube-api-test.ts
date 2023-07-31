@@ -1,11 +1,11 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { fetchAllVideoData } from './fetchAllChannelVideos';
+import { fetchAllVideoData } from './fetchAllVideoData';
 import { PrismaClient } from '@prisma/client';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY ?? "";
-const CHANNEL_ID = process.env.CHANNEL_ID ?? "";
+// const CHANNEL_ID = process.env.CHANNEL_ID ?? "";
 
 const prisma = new PrismaClient();
 
@@ -22,6 +22,9 @@ const prisma = new PrismaClient();
 
     for (const video of videosWithDescriptions) {
         console.log(`Video ID: ${video.id}`);
+        console.log(`Title: ${video.snippet.title}`);
+        console.log(`Published date: ${video.snippet.publishedAt}`);
+        console.log(`Channel ID: ${video.snippet.channelId}`);
         console.log(`Description: ${video.snippet.description}`);
         console.log('----------------------------------');
     }

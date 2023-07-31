@@ -7,7 +7,7 @@ import { AutoScroll } from "./types";
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdBlockerPlugin());
 
-export const scrapeVideoURLs = async (searchURL: string, browser: Browser, scroller: AutoScroll) => {
+export const scrapeVideoURLs = async (searchURL: string, browser: Browser, scroller: AutoScroll): Promise<string[]> => {
 
     const page = await browser.newPage();
     await page.goto(searchURL);
@@ -41,11 +41,11 @@ export const scrapeVideoURLs = async (searchURL: string, browser: Browser, scrol
 
 export const autoScroll = async (page: Page) => {
     await page.evaluate(async () => {
-        await new Promise((resolve, reject) => {
-            let distance = 1000000;
+        await new Promise((resolve) => {
+            const distance = 1000000;
             let totalHeight = 0;
-            let timer = setInterval(() => {
-                let scrollHeight = document.body.scrollHeight;
+            const timer = setInterval(() => {
+                const scrollHeight = document.body.scrollHeight;
                 window.scrollBy(0, distance);
                 totalHeight += distance;
 
