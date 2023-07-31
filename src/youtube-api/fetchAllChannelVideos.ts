@@ -1,6 +1,6 @@
 import axios from "axios";
-import { z } from 'zod';
-import { backOff } from "exponential-backoff";
+import { ZodError, z } from 'zod';
+// import { backOff } from "exponential-backoff";
 
 const VideoSchema = z.object({
     id: z.object({
@@ -20,15 +20,14 @@ export async function fetchAllChannelVideos(channelId: string, apiKey: string): 
 
     try {
         do {
-            const url: string = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=${maxResults}&pageToken=${nextPageToken}&key=${apiKey}`;
-            const response = await backOff(() => axios.get(url));
+            const url: string = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=${maxResults}&q=tampa%20never%20sleeps&pageToken=${nextPageToken}&key=${apiKey}`;
+            const response = await axios.get(url);
             const searchData = response.data;
 
             // slice to remove the first item as it is the channel itself
             for (const item of searchData.items.slice(1, -1)) {
-                const videoData = VideoSchema.safeParse(item);
-                if (videoData.success) allVideos.push(videoData.data);
-                else throw videoData.error;
+                const videoData = VideoSchema.parse(item);
+                allVideos.push(videoData);
             }
 
             nextPageToken = searchData.nextPageToken;
@@ -37,6 +36,7 @@ export async function fetchAllChannelVideos(channelId: string, apiKey: string): 
         return allVideos;
     } catch (error) {
         if (axios.isAxiosError(error)) throw new Error('Failed to fetch videos from the channel: ' + error.message);
+        else if (error instanceof ZodError) throw new Error('Zod parsing error' + error.message);
         else throw error;
     }
 }
