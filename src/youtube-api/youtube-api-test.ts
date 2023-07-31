@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { fetchAllChannelVideos } from './helperFunctions';
+import { fetchAllChannelVideos } from './fetchAllChannelVideos';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY ?? "";
 const CHANNEL_ID = process.env.CHANNEL_ID ?? "";
@@ -21,6 +21,8 @@ const CHANNEL_ID = process.env.CHANNEL_ID ?? "";
         console.log(`Description: ${video.snippet.description}`);
         console.log('----------------------------------');
     }
+
+    console.log(videosWithDescriptions.length)
 
 })();
 
