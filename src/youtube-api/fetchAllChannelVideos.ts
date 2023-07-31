@@ -3,9 +3,7 @@ import { ZodError, z } from 'zod';
 // import { backOff } from "exponential-backoff";
 
 const VideoSchema = z.object({
-    id: z.object({
-        videoId: z.string()
-    }),
+    id: z.string(),
     snippet: z.object({
         description: z.string()
     }),
@@ -13,30 +11,36 @@ const VideoSchema = z.object({
 
 type VideoObj = z.infer<typeof VideoSchema>;
 
-export async function fetchAllChannelVideos(channelId: string, apiKey: string): Promise<VideoObj[]> {
+const QueryResultSchema = z.object({
+    items: VideoSchema.array(),
+    nextPageToken: z.string().optional()
+})
+
+export async function fetchAllVideoData(apiKey: string, videoIds: string[]): Promise<VideoObj[]> {
     const maxResults = 50; // Maximum number of results per API call
-    let nextPageToken: string = '';
     const allVideos: VideoObj[] = [];
 
+    const baseEndpoint = 'https://www.googleapis.com/youtube/v3/videos';
+
     try {
-        do {
-            const url: string = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=${maxResults}&q=tampa%20never%20sleeps&pageToken=${nextPageToken}&key=${apiKey}`;
+        for (let i = 0; i < videoIds.length; i += maxResults) {
+            const batchVideoIds = videoIds.slice(i, i + maxResults);
+            const videoIdsString = batchVideoIds.join(',');
+
+            const url: string = `${baseEndpoint}?part=snippet&id=${videoIdsString}&key=${apiKey}`;
+            console.log(url)
             const response = await axios.get(url);
-            const searchData = response.data;
+            const queryResult = QueryResultSchema.parse(response.data);
 
-            // slice to remove the first item as it is the channel itself
-            for (const item of searchData.items.slice(1, -1)) {
-                const videoData = VideoSchema.parse(item);
-                allVideos.push(videoData);
+            for (const item of queryResult.items) {
+                const videoData = VideoSchema.safeParse(item);
+                if (videoData.success) allVideos.push(videoData.data);
             }
-
-            nextPageToken = searchData.nextPageToken;
-        } while (nextPageToken);
+        }
 
         return allVideos;
     } catch (error) {
         if (axios.isAxiosError(error)) throw new Error('Failed to fetch videos from the channel: ' + error.message);
-        else if (error instanceof ZodError) throw new Error('Zod parsing error' + error.message);
         else throw error;
     }
 }
