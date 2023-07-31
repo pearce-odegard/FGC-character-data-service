@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "scrape-data": "ts-node src/scraper/bot.ts",
-    "scrape-urls": "ts-node src/url-scraper/bot.ts",
+    "fetch-api": "ts-node src/youtube-api/youtube-api-test.ts",
     "seed-db": "ts-node src/character-game-starter-data/seed.ts",
     "lint": "eslint src/**/*.ts"
   },
@@ -16,13 +15,10 @@
     "@prisma/client": "^5.0.0",
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",
-    "puppeteer": "^20.7.3",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-adblocker": "^2.13.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@types/puppeteer": "^7.0.4",
+    "@types/node": "^20.4.5",
     "@typescript-eslint/eslint-plugin": "^6.2.0",
     "@typescript-eslint/parser": "^6.2.0",
     "eslint": "^8.45.0",
