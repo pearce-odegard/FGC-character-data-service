@@ -3,6 +3,8 @@ dotenv.config();
 
 import { fetchAllVideoData } from './fetchAllVideoData';
 import { PrismaClient } from '@prisma/client';
+import { extractMatchData } from './tallyDescriptionData';
+import { getGameIdForVideo } from './helperFunctions';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY ?? "";
 // const CHANNEL_ID = process.env.CHANNEL_ID ?? "";
@@ -13,23 +15,20 @@ const prisma = new PrismaClient();
 
     const videoIds = (await prisma.videoURL.findMany()).map(item => item.url.split("=")[1]);
 
-    const videosWithDescriptions = await fetchAllVideoData(YOUTUBE_API_KEY, videoIds);
+    const videos = await fetchAllVideoData(YOUTUBE_API_KEY, videoIds);
 
-    if (videosWithDescriptions.length === 0) {
-        console.log('No videos found from the "Tampa Never Sleeps" channel.');
+    if (videos.length === 0) {
+        console.log('No videos found.');
         return;
     }
 
-    for (const video of videosWithDescriptions) {
-        console.log(`Video ID: ${video.id}`);
-        console.log(`Title: ${video.snippet.title}`);
-        console.log(`Published date: ${video.snippet.publishedAt}`);
-        console.log(`Channel ID: ${video.snippet.channelId}`);
-        console.log(`Description: ${video.snippet.description}`);
-        console.log('----------------------------------');
+    for (const video of videos) {
+        const gameId = await getGameIdForVideo(prisma, video);
+        console.log(extractMatchData(prisma, video.snippet.description, gameId));
+        console.log('---------------------------------');
     }
 
-    console.log(videosWithDescriptions.length)
+    console.log(videos.length)
 
 })();
 

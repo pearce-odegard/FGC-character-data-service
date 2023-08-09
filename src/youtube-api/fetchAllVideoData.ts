@@ -12,7 +12,7 @@ const VideoSchema = z.object({
     }),
 });
 
-type VideoObj = z.infer<typeof VideoSchema>;
+export type VideoObj = z.infer<typeof VideoSchema>;
 
 const QueryResultSchema = z.object({
     items: VideoSchema.array()
@@ -31,9 +31,9 @@ export async function fetchAllVideoData(apiKey: string, videoIds: string[]): Pro
 
             const url: string = `${baseEndpoint}?part=snippet&id=${videoIdsString}&key=${apiKey}`;
             const response = await axios.get(url);
-            const queryResult = QueryResultSchema.parse(response.data);
+            const { items } = QueryResultSchema.parse(response.data);
 
-            for (const item of queryResult.items) {
+            for (const item of items) {
                 const videoData = VideoSchema.safeParse(item);
                 if (videoData.success) allVideos.push(videoData.data);
             }
@@ -41,7 +41,7 @@ export async function fetchAllVideoData(apiKey: string, videoIds: string[]): Pro
 
         return allVideos;
     } catch (error) {
-        if (axios.isAxiosError(error)) throw new Error('Failed to fetch videos from the channel: ' + error.message);
+        if (axios.isAxiosError(error)) throw new Error('Failed to fetch videos: ' + error.message);
         else throw new Error("Unknown error: " + (error as Error).message);
     }
 }
