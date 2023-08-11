@@ -10,11 +10,11 @@ Next, I use these URLs to fetch metadata about relevant videos from the YouTube 
 
 Said metadata most importantly includes the description of each video, which I then parse to determine what players were featured in the given video and what character(s) they used (also stored in the Railway-hosted Postgres DB).
 
-# Change Log
+## Change Log
 
 - Updated to use the YouTube data API instead of a second Puppeteer scraper to collect video metadata
 
-# Roadmap
+## Roadmap
 
 - Move from Prisma to DrizzleORM
 - Implement functionality for all games on the TNS channel
