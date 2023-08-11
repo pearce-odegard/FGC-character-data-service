@@ -1,22 +1,20 @@
-import { Character, PrismaClient } from "@prisma/client";
-import { getCharacterByGameIdAndNameOrNull } from "./prismaWrapperFunctions";
+import { PrismaClient } from "@prisma/client";
 
 interface PlayerCharacter {
     [key: string]: string;
 }
 
-export function extractMatchData(prisma: PrismaClient, dataString: string, gameId: number) {
+export function extractMatchDataSolo(prisma: PrismaClient, dataString: string) {
 
     const lines = dataString.split('\n');
 
     const playerCharacters: PlayerCharacter[] = [];
 
     for (const line of lines) {
-        if (!line.includes('vs')) continue;
+        if (!line.includes(' vs') || !line.includes('(')) continue;
 
         // slicing out the first item in the string, AKA the timestamp
-        const lineParts = line.split(' ').slice(1).join(' ').replace('.', '').split('vs');
-        console.log(lineParts)
+        const lineParts = line.split(' ').slice(1).join(' ').replace(/\./g, '').split('vs');
 
         const part1 = lineParts[0].split('(');
 
