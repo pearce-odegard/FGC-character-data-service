@@ -22,8 +22,12 @@ const prisma = new PrismaClient();
         return;
     }
 
+    const games = await prisma.game.findMany();
+
     for (const video of videos) {
-        const gameId = await getGameIdForVideo(prisma, video);
+        const gameId = await getGameIdForVideo(games, video);
+        if (gameId === 0) continue;
+        console.log(video.id)
         console.log(extractMatchData(prisma, video.snippet.description, gameId));
         console.log('---------------------------------');
     }

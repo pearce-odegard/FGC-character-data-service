@@ -5,34 +5,38 @@ interface PlayerCharacter {
     [key: string]: string;
 }
 
-
-export async function extractMatchData(prisma: PrismaClient, dataString: string, gameId: number) {
-
-    if (gameId === 0) {
-        return [];
-    }
+export function extractMatchData(prisma: PrismaClient, dataString: string, gameId: number) {
 
     const lines = dataString.split('\n');
+
+    const playerCharacters: PlayerCharacter[] = [];
 
     for (const line of lines) {
         if (!line.includes('vs')) continue;
 
-        const lineParts = line.split(' ');
-        // shift to eliminate timestamps
-        lineParts.shift();
+        // slicing out the first item in the string, AKA the timestamp
+        const lineParts = line.split(' ').slice(1).join(' ').replace('.', '').split('vs');
+        console.log(lineParts)
 
-        const playerCharacters: PlayerCharacter[] = [];
+        const part1 = lineParts[0].split('(');
 
-        for (const part of lineParts) {
-            const playerCharacter: PlayerCharacter = { player: "" };
-
-            if (part.startsWith('(') && part.endsWith(')')) {
-                playerCharacter.character = part.slice(1, -1);
-            } else if (!(part === 'vs' || part === 'vs.')) {
-                playerCharacter.player += part;
-            }
+        const player1 = {
+            player: part1[0].replace('-', '').trim(),
+            character: part1[1].replace(')', '').trim()
         }
+
+        console.log(player1)
+
+        const part2 = lineParts[1].split('(');
+
+        const player2 = {
+            player: part2[0].replace('-', '').trim(),
+            character: part2[1].replace(')', '').trim()
+        }
+
+        console.log(player2)
+
     }
 
-    return lines;
+    return playerCharacters;
 }
