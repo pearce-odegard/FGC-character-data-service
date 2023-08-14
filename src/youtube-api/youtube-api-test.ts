@@ -3,7 +3,7 @@ dotenv.config();
 
 import { fetchAllVideoData } from './fetchAllVideoData';
 import { PrismaClient } from '@prisma/client';
-import { extractMatchDataSolo } from './tallyDescriptionData';
+import { extractMatchDataSolo } from './extractMatchData';
 import { getGameForVideo } from './helperFunctions';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY ?? "";
