@@ -25,12 +25,11 @@ const prisma = new PrismaClient();
     const games = await prisma.game.findMany();
 
     for (const video of videos) {
-        console.log(video.id, video.snippet.title)
         const game = getGameForVideo(games, video);
         if (!game) {
             continue;
         } else if (!game.isTeamGame) {
-            console.log(extractMatchDataSolo(prisma, video.snippet.description));
+            console.log(extractMatchDataSolo(video)); ``
             console.log('---------------------------------');
         } else if (game.isTeamGame) {
             // use other function here

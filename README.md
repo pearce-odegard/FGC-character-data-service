@@ -2,7 +2,7 @@
 
 ## Tech Stack: TypeScript, Puppeteer, Prisma, PostgresQL
 
-This is a service that will be running in the cloud to provide data for the eventual web app I'll be building. The data is collected in a few steps using Typescript, [Puppeteer](https://pptr.dev/), and the [YouTube Data API](https://developers.google.com/youtube/v3/docs/search/list).
+This is a service that will be running in the cloud to provide data for the eventual web app I'll be building. The data is collected in a few steps using TypeScript, [Puppeteer](https://pptr.dev/), and the [YouTube Data API](https://developers.google.com/youtube/v3/docs/search/list).
 
 Firstly, the **url-scraper** uses Puppeteer to acquire URLs for all videos from the [Tampa Never Sleeps](https://www.youtube.com/@TampaNeverSleeps) YouTube channel and stores them in a Postgres DB (hosted on [Railway](railway.app)) using Prisma. I am getting URLs from specifically this channel because they provide player and character data nicely formatted in the description of each video (most of the time).
 

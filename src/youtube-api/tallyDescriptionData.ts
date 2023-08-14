@@ -1,12 +1,14 @@
-import { PrismaClient } from "@prisma/client";
+import { VideoObj } from "./fetchAllVideoData";
 
 interface PlayerCharacter {
-    [key: string]: string;
+    player: string;
+    character: string;
+    videoId: string;
 }
 
-export function extractMatchDataSolo(prisma: PrismaClient, dataString: string) {
+export function extractMatchDataSolo(video: VideoObj) {
 
-    const lines = dataString.split('\n');
+    const lines = video.snippet.description.split('\n');
 
     const playerCharacters: PlayerCharacter[] = [];
 
@@ -20,19 +22,21 @@ export function extractMatchDataSolo(prisma: PrismaClient, dataString: string) {
 
         const player1 = {
             player: part1[0].replace('-', '').trim(),
-            character: part1[1].replace(')', '').trim()
+            character: part1[1].replace(')', '').trim(),
+            videoId: video.id
         }
 
-        console.log(player1)
+        playerCharacters.push(player1);
 
         const part2 = lineParts[1].split('(');
 
         const player2 = {
             player: part2[0].replace('-', '').trim(),
-            character: part2[1].replace(')', '').trim()
+            character: part2[1].replace(')', '').trim(),
+            videoId: video.id
         }
 
-        console.log(player2)
+        playerCharacters.push(player2);
 
     }
 
