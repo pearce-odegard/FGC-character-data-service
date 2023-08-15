@@ -7,7 +7,6 @@ import { extractMatchDataSolo } from './extractMatchData';
 import { getGameForVideo } from './helperFunctions';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY ?? "";
-// const CHANNEL_ID = process.env.CHANNEL_ID ?? "";
 
 const prisma = new PrismaClient();
 
@@ -26,14 +25,19 @@ const prisma = new PrismaClient();
 
     for (const video of videos) {
         const game = getGameForVideo(games, video);
-        if (!game) {
-            continue;
-        } else if (!game.isTeamGame) {
-            console.log(extractMatchDataSolo(video)); ``
-            console.log('---------------------------------');
-        } else if (game.isTeamGame) {
-            // use other function here
-            console.log("Team game function not implemented yet");
+        switch (game?.isTeamGame) {
+            case undefined:
+                continue;
+            case true:
+                console.log(`Video ID: ${video.id}`);
+                console.log('Team function not yet implemented!');
+                break;
+            case false:
+                console.log(`Video ID: ${video.id}`);
+                const resultSolo = extractMatchDataSolo(video);
+                console.log(resultSolo)
+                console.log('---------------------------------');
+                break;
         }
     }
 
