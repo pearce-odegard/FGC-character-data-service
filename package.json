@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": ">=14.0.0",
+    "pnpm": ">=6.0.0"
+  },
   "scripts": {
     "fetch": "ts-node src/youtube-api/youtube-api-test.ts",
     "seed-db": "ts-node src/character-game-starter-data/seed.ts",
@@ -25,7 +29,6 @@
   },
   "devDependencies": {
     "@types/node": "^20.4.5",
-    "@types/puppeteer": "^7.0.4",
     "@typescript-eslint/eslint-plugin": "^6.2.0",
     "@typescript-eslint/parser": "^6.2.0",
     "eslint": "^8.45.0",
