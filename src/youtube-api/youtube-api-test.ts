@@ -5,6 +5,11 @@ import { fetchAllVideoData } from "./fetchAllVideoData";
 import { PrismaClient } from "@prisma/client";
 import { extractMatchDataSolo, extractMatchDataTeam } from "./extractMatchData";
 import { getGameForVideo } from "./helperFunctions";
+import {
+  getAllCharacters,
+  getCharactersByGame,
+  saveTournamentSolo,
+} from "./prismaWrapperFunctions";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY ?? "";
 
@@ -16,8 +21,9 @@ const prisma = new PrismaClient();
   const videoIds = videoURLs.map((item) => {
     const videoId = item.url.split("=")[1];
 
-    if (!videoId)
+    if (!videoId) {
       throw new Error(`INVALID URL: no video ID found for ${item.url}`);
+    }
 
     return videoId;
   });
@@ -31,18 +37,26 @@ const prisma = new PrismaClient();
 
   const games = await prisma.game.findMany();
 
+  const allCharacters = await getAllCharacters(prisma);
+
   for (const video of videos) {
     const game = getGameForVideo(games, video);
-    switch (game?.isTeamGame) {
-      case undefined:
-        continue;
+
+    if (!game) continue;
+
+    const allGameCharacters = allCharacters.filter((character) => {
+      return character.gameId === game.id;
+    });
+
+    switch (game.isTeamGame) {
       case true:
-        const resultTeam = extractMatchDataTeam(video, game);
+        const resultTeam = extractMatchDataTeam(video, game, allGameCharacters);
         console.log(resultTeam);
         break;
       case false:
-        const resultSolo = extractMatchDataSolo(video, game);
+        const resultSolo = extractMatchDataSolo(video, game, allGameCharacters);
         console.log(resultSolo);
+        // console.log(await saveTournamentSolo(prisma, resultSolo));
         break;
       default:
         console.log(`Video ID: ${video.id}`);

@@ -1,8 +1,9 @@
 import z from "zod";
+import { getCharactersByGame } from "./prismaWrapperFunctions";
 
 export interface PlayerCharacter {
   player: string;
-  character: string;
+  character: number;
 }
 
 export interface PlayerCharacterTeam {
@@ -15,7 +16,13 @@ export interface PlayerCharacterTeam {
 export interface MatchData {
   videoId: string;
   gameId: number;
-  playerCharacters: PlayerCharacter[] | PlayerCharacterTeam[];
+  title: string;
+  channelId: string;
+  publishedAt: string;
+  description: string;
+  playerCharacters?: PlayerCharacter[];
+  playerCharactersTeams?: PlayerCharacterTeam[];
+  characterCounts: Record<string, number>;
 }
 
 export const VideoSchema = z.object({
@@ -33,3 +40,7 @@ export type VideoObj = z.infer<typeof VideoSchema>;
 export const QueryResultSchema = z.object({
   items: VideoSchema.array(),
 });
+
+export type GetCharactersResult = Awaited<
+  ReturnType<typeof getCharactersByGame>
+>;

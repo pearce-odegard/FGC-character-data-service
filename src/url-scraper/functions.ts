@@ -1,11 +1,11 @@
 import { Browser, Page } from "puppeteer";
 import { AutoScroll } from "./types";
 
-export const scrapeVideoURLs = async (
+export async function scrapeVideoURLs(
   searchURL: string,
   browser: Browser,
   scroller: AutoScroll
-): Promise<string[]> => {
+): Promise<string[]> {
   const page = await browser.newPage();
   await page.goto(searchURL);
 
@@ -36,9 +36,9 @@ export const scrapeVideoURLs = async (
   await page.close();
 
   return hrefs;
-};
+}
 
-export const autoScroll = async (page: Page) => {
+export async function autoScroll(page: Page) {
   await page.evaluate(async () => {
     await new Promise((resolve) => {
       const distance = 1000000;
@@ -55,4 +55,4 @@ export const autoScroll = async (page: Page) => {
       }, 50);
     });
   });
-};
+}
