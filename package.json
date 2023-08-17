@@ -22,9 +22,7 @@
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",
     "exponential-backoff": "^3.1.1",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-adblocker": "^2.13.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "puppeteer": "^21.0.3",
     "zod": "^3.21.4"
   },
   "devDependencies": {
@@ -32,7 +30,6 @@
     "@typescript-eslint/eslint-plugin": "^6.2.0",
     "@typescript-eslint/parser": "^6.2.0",
     "eslint": "^8.45.0",
-    "prettier": "^3.0.0",
     "prisma": "^5.1.1"
   }
 }

@@ -16,7 +16,7 @@ Said metadata most importantly includes the description of each video, which I t
 
 ## Roadmap
 
+- Deploy code for scheduled runs in the cloud updating the DB with new video releases
 - Move from Prisma to DrizzleORM
 - Implement functionality for all games on the TNS channel
 - Implement functionality for other games on other channels (namely super smash bros.)
-- Make code more efficient, so as to enable scheduled runs in the cloud updating the DB with new video releases
