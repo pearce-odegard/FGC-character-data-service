@@ -6,15 +6,6 @@ export async function getAllCharacters(prisma: PrismaClient) {
     include: {
       altNames: true,
     },
-    where: {
-      altNames: {
-        some: {
-          id: {
-            not: undefined,
-          },
-        },
-      },
-    },
   });
 
   return characters;

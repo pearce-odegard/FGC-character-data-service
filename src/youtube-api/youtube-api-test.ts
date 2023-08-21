@@ -48,6 +48,8 @@ const prisma = new PrismaClient();
       return character.gameId === game.id;
     });
 
+    console.log(`Video ID: ${video.id}`);
+
     switch (game.isTeamGame) {
       case true:
         const resultTeam = extractMatchDataTeam(video, game, allGameCharacters);
@@ -59,9 +61,8 @@ const prisma = new PrismaClient();
         // console.log(await saveTournamentSolo(prisma, resultSolo));
         break;
       default:
-        console.log(`Video ID: ${video.id}`);
+        console.log("---------------------------------");
     }
-    console.log("---------------------------------");
   }
 
   console.log(videos.length);

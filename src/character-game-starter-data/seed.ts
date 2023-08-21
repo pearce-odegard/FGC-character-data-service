@@ -5,122 +5,246 @@ import { characterLists } from "./characterLists";
   const prisma = new PrismaClient();
 
   // seed games
-  await prisma.game.createMany({
-    data: Object.keys(characterLists).map((name) => {
-      return {
-        name: name,
-        isTeamGame: name === "umvc3",
-      };
-    }),
-    skipDuplicates: true,
-  });
+  // await prisma.game.createMany({
+  //   data: Object.keys(characterLists).map((name) => {
+  //     return {
+  //       name: name,
+  //       isTeamGame: name === "umvc3",
+  //     };
+  //   }),
+  //   skipDuplicates: true,
+  // });
 
-  // seed characters
-  for (const [name, arr] of Object.entries(characterLists)) {
-    await prisma.game.update({
-      where: {
-        name: name,
-      },
-      data: {
-        Characters: {
-          createMany: {
-            data: arr.map((name) => {
-              return { name };
-            }),
-          },
-        },
-      },
-    });
-  }
+  // // seed characters
+  // for (const [name, arr] of Object.entries(characterLists)) {
+  //   await prisma.game.update({
+  //     where: {
+  //       name: name,
+  //     },
+  //     data: {
+  //       Characters: {
+  //         createMany: {
+  //           data: [
+  //             // include an entry for each game to account for when a character isn't available for a certain player
+  //             // in the description
+  //             { name: "Character Not Available" },
+  //             ...arr.map((name) => {
+  //               return { name };
+  //             })],
+  //         },
+  //       },
+  //     },
+  //   });
+  // }
 
-  // seed alt character names
-  const haggar = await prisma.character.findFirst({
-    where: {
-      name: "Haggar",
-    },
-  });
 
-  if (haggar) {
-    await prisma.characterAltName.create({
-      data: {
-        name: "Hagggar",
-        characterId: haggar.id,
-      },
-    });
-  }
+  // // seed alt character names
 
-  const deejay = await prisma.character.findFirst({
-    where: {
-      name: "Dee Jay",
-    },
-  });
+  // // marvel
+  // const haggar = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Haggar",
+  //   },
+  // });
 
-  if (deejay) {
-    await prisma.characterAltName.createMany({
-      data: [
-        { name: "Deejay", characterId: deejay.id },
-        { name: "Deejjay", characterId: deejay.id },
-      ],
-    });
-  }
+  // if (haggar) {
+  //   await prisma.characterAltName.create({
+  //     data: {
+  //       name: "Hagggar",
+  //       characterId: haggar.id,
+  //     },
+  //   });
+  // }
 
-  const jackO = await prisma.character.findFirst({
-    where: {
-      name: "Jack-O'",
-    },
-  });
+  // const magneto = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Magneto",
+  //   },
+  // });
 
-  if (jackO) {
-    await prisma.characterAltName.createMany({
-      data: [{ name: "Jack-O", characterId: jackO.id }],
-    });
-  }
+  // if (magneto) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Mangeto", characterId: magneto.id }],
+  //   });
+  // }
 
-  const bedman = await prisma.character.findFirst({
-    where: {
-      name: "Bedman?",
-    },
-  });
+  // const shuma = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Shuma",
+  //   },
+  // });
 
-  if (bedman) {
-    await prisma.characterAltName.createMany({
-      data: [{ name: "Bedman", characterId: bedman.id }],
-    });
-  }
+  // if (shuma) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Shuma-Gorath", characterId: shuma.id }],
+  //   });
+  // }
 
-  const zato = await prisma.character.findFirst({
-    where: {
-      name: "Zato",
-    },
-  });
+  // const vergil = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Vergil",
+  //   },
+  // });
 
-  if (zato) {
-    await prisma.characterAltName.createMany({
-      data: [{ name: "Zato-1", characterId: zato.id }],
-    });
-  }
+  // if (vergil) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Virgil", characterId: vergil.id }],
+  //   });
+  // }
 
-  const shuma = await prisma.character.findFirst({
-    where: {
-      name: "Shuma",
-    },
-  });
+  // const dormammu = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Dormammu",
+  //   },
+  // });
 
-  if (shuma) {
-    await prisma.characterAltName.createMany({
-      data: [{ name: "Shuma-Gorath", characterId: shuma.id }],
-    });
-  }
+  // if (dormammu) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [
+  //       // { name: "Dormmamu", characterId: dormammu.id },
+  //       { name: "Dormammy", characterId: dormammu.id }
+  //     ],
+  //   });
+  // }
 
-  const happyChaos = await prisma.character.findFirst({
-    where: {
-      name: "Happy Chaos",
-    },
-  });
+  // const ironFist = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Iron Fist",
+  //   },
+  // });
 
-  if (happyChaos) {
-    await prisma.characterAltName.createMany({
-      data: [{ name: "Happy", characterId: happyChaos.id }],
-    });
-  }
+  // if (ironFist) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Fist", characterId: ironFist.id }],
+  //   });
+  // }
+
+  // const ironMan = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Iron Man",
+  //   },
+  // });
+
+  // if (ironMan) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Man", characterId: ironMan.id }],
+  //   });
+  // }
+
+  // // sf6
+  // const deejay = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Dee Jay",
+  //   },
+  // });
+
+  // if (deejay) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [
+  //       { name: "Deejay", characterId: deejay.id },
+  //       { name: "Deejjay", characterId: deejay.id },
+  //     ],
+  //   });
+  // }
+
+  // const guile = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Guile",
+  //   },
+  // });
+
+  // if (guile) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [
+  //       { name: "NuckleDu", characterId: guile.id }
+  //     ],
+  //   });
+  // }
+
+  // const cammy = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Cammy",
+  //   },
+  // });
+
+  // if (cammy) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [
+  //       { name: "Punk", characterId: cammy.id }
+  //     ],
+  //   });
+  // }
+
+  // // strive
+  // const jackO = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Jack-O'",
+  //   },
+  // });
+
+  // if (jackO) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Jack-O", characterId: jackO.id }],
+  //   });
+  // }
+
+  // const bedman = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Bedman?",
+  //   },
+  // });
+
+  // if (bedman) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Bedman", characterId: bedman.id }],
+  //   });
+  // }
+
+  // const zato = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Zato",
+  //   },
+  // });
+
+  // if (zato) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Zato-1", characterId: zato.id }],
+  //   });
+  // }
+
+  // const happyChaos = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Happy Chaos",
+  //   },
+  // });
+
+  // if (happyChaos) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Happy", characterId: happyChaos.id }],
+  //   });
+  // }
+
+  // const bridget = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Bridget",
+  //   },
+  // });
+
+  // if (bridget) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Briget", characterId: bridget.id }],
+  //   });
+  // }
+
+  // const ramlethal = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Ramlethal",
+  //   },
+  // });
+
+  // if (ramlethal) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Ram", characterId: ramlethal.id }],
+  //   });
+  // }
 })();

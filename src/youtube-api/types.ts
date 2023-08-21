@@ -8,9 +8,9 @@ export interface PlayerCharacter {
 
 export interface PlayerCharacterTeam {
   player: string;
-  character1: string;
-  character2: string;
-  character3: string;
+  character1: number;
+  character2: number;
+  character3: number;
 }
 
 export interface MatchData {

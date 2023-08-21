@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 
   // the slice removes the first and last items, which for some reason are showing up as empty strings
   const videoList = (
-    await scrapeVideoURLs(process.env.SEARCHURL ?? "", browser, autoScroll)
+    await scrapeVideoURLs(process.env.SEARCH_URL ?? "", browser, autoScroll)
   ).slice(1, -1);
 
   await prisma.videoURL.createMany({
