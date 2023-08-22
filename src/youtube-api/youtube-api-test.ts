@@ -7,8 +7,6 @@ import { extractMatchDataSolo, extractMatchDataTeam } from "./extractMatchData";
 import { getGameForVideo } from "./helperFunctions";
 import {
   getAllCharacters,
-  getCharactersByGame,
-  saveTournamentSolo,
 } from "./prismaWrapperFunctions";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY ?? "";

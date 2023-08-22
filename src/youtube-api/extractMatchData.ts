@@ -1,10 +1,11 @@
 import { Game } from "@prisma/client";
 import {
   lastWord,
-  splitTeamCharactersToIDs,
   translateCharNameToID,
+  translateTeamCharactersToIDs,
 } from "./helperFunctions";
 import {
+  CharacterCounts,
   GetCharactersResult,
   MatchData,
   PlayerCharacter,
@@ -27,7 +28,7 @@ export function extractMatchDataSolo(
 
   const playerCharacters: PlayerCharacter[] = [];
 
-  const characterCounts: Record<number, number> = {};
+  const characterCounts: CharacterCounts = {};
 
   for (const line of lines) {
 
@@ -56,20 +57,14 @@ export function extractMatchDataSolo(
         );
       }
 
-      const characterId = characterName === "" ?
-        translateCharNameToID(
-          "Character Not Available",
-          gameCharacters
-        ) : translateCharNameToID(
-          characterName,
-          gameCharacters
-        );
+      const characterId = translateCharNameToID(characterName, gameCharacters);
 
-      if (characterCounts.hasOwnProperty(characterId)) {
-        characterCounts[characterId]++;
+      if (characterCounts.hasOwnProperty(characterName)) {
+        characterCounts[characterName]!.count++;
       } else {
-        characterCounts[characterId] = 1;
+        characterCounts[characterName] = { id: characterId, count: 1 };
       }
+
 
       const playerEdgeCases = [
         player.includes("Losers Round 1 A"),
@@ -104,13 +99,14 @@ export function extractMatchDataTeam(
   const lines = video.snippet.description
     .split("\n")
     .filter(line => {
-      return line.includes(" vs") && line.includes("(");
+      const includesCharacters = gameCharacters.some((character) => line.includes(character.name));
+      return line.includes(" vs") && line.includes("(") && includesCharacters;
     })
     .slice(-4);
 
   const playerCharactersTeams: PlayerCharacterTeam[] = [];
 
-  const characterCounts: Record<number, number> = {};
+  const characterCounts: CharacterCounts = {};
 
   for (const line of lines) {
 
@@ -145,13 +141,14 @@ export function extractMatchDataTeam(
         player.includes("Losers Round 1 B"),
       ];
 
-      const charsInTeam = splitTeamCharactersToIDs(characterTeam, gameCharacters);
+      const charsInTeam = translateTeamCharactersToIDs(characterTeam, gameCharacters);
 
-      for (const characterId of Object.values(charsInTeam)) {
-        if (characterCounts.hasOwnProperty(characterId)) {
-          characterCounts[characterId]++;
+      for (const characterIdName of Object.values(charsInTeam)) {
+        const name = characterIdName.name;
+        if (characterCounts.hasOwnProperty(name)) {
+          characterCounts[name]!.count++;
         } else {
-          characterCounts[characterId] = 1;
+          characterCounts[name] = { id: characterIdName.id, count: 1 }
         }
       }
 
@@ -159,7 +156,9 @@ export function extractMatchDataTeam(
         player: (playerEdgeCases.includes(true) ? lastWord(player) : player)
           .replace("-", "")
           .trim(),
-        ...charsInTeam
+        character1: charsInTeam.character1.id,
+        character2: charsInTeam.character2.id,
+        character3: charsInTeam.character3.id,
       };
 
       playerCharactersTeams.push(playercharacterTeam);

@@ -1,4 +1,4 @@
-import { Character, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { MatchData } from "./types";
 
 export async function getAllCharacters(prisma: PrismaClient) {

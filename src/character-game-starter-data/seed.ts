@@ -40,6 +40,24 @@ import { characterLists } from "./characterLists";
 
   // // seed alt character names
 
+  // // character not available --> empty string
+  // const characterNotAvailableIDs = await prisma.character.findMany({
+  //   select: {
+  //     id: true,
+  //   },
+  //   where: {
+  //     name: "Character Not Available",
+  //   },
+  // });
+
+  // if (characterNotAvailableIDs.length > 0) {
+  //   for (const id of characterNotAvailableIDs) {
+  //     await prisma.characterAltName.create({
+  //       data: { name: "", characterId: id.id },
+  //     });
+  //   }
+  // }
+
   // // marvel
   // const haggar = await prisma.character.findFirst({
   //   where: {
@@ -64,7 +82,11 @@ import { characterLists } from "./characterLists";
 
   // if (magneto) {
   //   await prisma.characterAltName.createMany({
-  //     data: [{ name: "Mangeto", characterId: magneto.id }],
+  //     data: [
+  //       // { name: "Mangeto", characterId: magneto.id },
+  //       // { name: "Megneto", characterId: magneto.id },
+  //       { name: "Magento", characterId: magneto.id },
+  //     ],
   //   });
   // }
 
@@ -88,7 +110,10 @@ import { characterLists } from "./characterLists";
 
   // if (vergil) {
   //   await prisma.characterAltName.createMany({
-  //     data: [{ name: "Virgil", characterId: vergil.id }],
+  //     data: [
+  //       { name: "Virgil", characterId: vergil.id },
+  //       { name: "Veril", characterId: vergil.id },
+  //     ],
   //   });
   // }
 
@@ -128,6 +153,32 @@ import { characterLists } from "./characterLists";
   // if (ironMan) {
   //   await prisma.characterAltName.createMany({
   //     data: [{ name: "Man", characterId: ironMan.id }],
+  //   });
+  // }
+
+  // const captainAmerica = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Captain America",
+  //   },
+  // });
+
+  // if (captainAmerica) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Captain", characterId: captainAmerica.id }],
+  //   });
+  // }
+
+  // const cViper = await prisma.character.findFirst({
+  //   where: {
+  //     name: "C.Viper",
+  //   },
+  // });
+
+  // if (cViper) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [
+  //       { name: "Viper", characterId: cViper.id },
+  //     ],
   //   });
   // }
 

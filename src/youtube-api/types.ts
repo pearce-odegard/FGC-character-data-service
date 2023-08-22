@@ -13,6 +13,18 @@ export interface PlayerCharacterTeam {
   character3: number;
 }
 
+export interface CharacterIdName {
+  id: number;
+  name: string;
+}
+
+export interface CharacterCount {
+  id: number;
+  count: number;
+}
+
+export type CharacterCounts = Record<string, CharacterCount>;
+
 export interface MatchData {
   videoId: string;
   gameId: number;
@@ -22,7 +34,7 @@ export interface MatchData {
   description: string;
   playerCharacters?: PlayerCharacter[];
   playerCharactersTeams?: PlayerCharacterTeam[];
-  characterCounts: Record<string, number>;
+  characterCounts: CharacterCounts;
 }
 
 export const VideoSchema = z.object({
@@ -44,3 +56,9 @@ export const QueryResultSchema = z.object({
 export type GetCharactersResult = Awaited<
   ReturnType<typeof getCharactersByGame>
 >;
+
+export type TeamPartial = {
+  character1: number;
+  character2: number;
+  character3: number;
+}

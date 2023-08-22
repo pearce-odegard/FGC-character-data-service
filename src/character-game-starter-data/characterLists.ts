@@ -47,7 +47,7 @@ export const marvel = [
   "Viewtiful Joe",
   "Wesker",
   "Zero",
-  "Captain",
+  "Captain America",
   "Deadpool",
   "Doom",
   "Strange",
