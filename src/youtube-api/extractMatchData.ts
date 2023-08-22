@@ -22,7 +22,8 @@ export function extractMatchDataSolo(
   const lines = video.snippet.description
     .split("\n")
     .filter(line => {
-      return line.includes(" vs") && line.includes("(");
+      const includesCharacters = gameCharacters.some((character) => line.includes(character.name));
+      return line.includes(" vs") && line.includes("(") && includesCharacters;
     })
     .slice(-4);
 
@@ -57,28 +58,29 @@ export function extractMatchDataSolo(
         );
       }
 
-      const characterId = translateCharNameToID(characterName, gameCharacters);
-
-      if (characterCounts.hasOwnProperty(characterName)) {
-        characterCounts[characterName]!.count++;
-      } else {
-        characterCounts[characterName] = { id: characterId, count: 1 };
-      }
-
-
       const playerEdgeCases = [
         player.includes("Losers Round 1 A"),
         player.includes("Losers Round 1 B"),
       ];
 
-      const playerCharacter = {
-        player: (playerEdgeCases.includes(true) ? lastWord(player) : player)
-          .replace("-", "")
-          .trim(),
-        character: characterId,
-      };
+      const checkedPlayer = (playerEdgeCases.includes(true) ? lastWord(player) : player).replace("-", "").trim();
 
-      playerCharacters.push(playerCharacter);
+      if (playerCharacters.some(obj => obj.player === checkedPlayer)) continue;
+
+      const characterId = translateCharNameToID(characterName, gameCharacters);
+
+      const trimmedCharName = characterName.trim();
+
+      if (characterCounts.hasOwnProperty(trimmedCharName)) {
+        characterCounts[trimmedCharName]!.count++;
+      } else {
+        characterCounts[trimmedCharName] = { id: characterId, count: 1 };
+      }
+
+      playerCharacters.push({
+        player: checkedPlayer,
+        character: characterId,
+      });
     }
   }
 
