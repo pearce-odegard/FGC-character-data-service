@@ -1,9 +1,5 @@
 import { Game } from "@prisma/client";
-import {
-  CharacterIdName,
-  GetCharactersResult,
-  VideoObj,
-} from "./types";
+import { CharacterIdName, GetCharactersResult, VideoObj } from "./types";
 
 export function getGameForVideo(games: Game[], video: VideoObj): Game | null {
   const title = video.snippet.title.toLowerCase();
@@ -39,17 +35,23 @@ export function lastWord(inputString: string) {
   return lastWord;
 }
 
-export function translateTeamCharactersToIDs(teamString: string, allCharacters: GetCharactersResult) {
-
+export function translateTeamCharactersToIDs(
+  teamString: string,
+  allCharacters: GetCharactersResult
+) {
   const characters: CharacterIdName[] = [];
 
   const normalizedTeamString = teamString.trim().toLowerCase();
 
   for (const character of allCharacters) {
-    const altNames = character.altNames.map((altName) => altName.name.toLowerCase());
+    const altNames = character.altNames.map((altName) =>
+      altName.name.toLowerCase()
+    );
     const normalizedName = character.name.toLowerCase();
-    if (normalizedTeamString.includes(normalizedName) ||
-      altNames.some((altName) => normalizedTeamString.includes(altName))) {
+    if (
+      normalizedTeamString.includes(normalizedName) ||
+      altNames.some((altName) => normalizedTeamString.includes(altName))
+    ) {
       characters.push({ name: character.name, id: character.id });
     }
   }
@@ -57,7 +59,9 @@ export function translateTeamCharactersToIDs(teamString: string, allCharacters: 
   const [character1, character2, character3] = characters;
 
   if (!character1 || !character2 || !character3) {
-    throw new Error(`ERROR: Invalid team string: ${teamString}\ncharacter1: ${character1}\ncharacter2: ${character2}\ncharacter3: ${character3}`);
+    throw new Error(
+      `ERROR: Invalid team string: ${teamString}\ncharacter1: ${character1?.name}\ncharacter2: ${character2?.name}\ncharacter3: ${character3?.name}`
+    );
   }
 
   return { character1, character2, character3 };
@@ -67,17 +71,20 @@ export function translateCharNameToID(
   name: string,
   characters: GetCharactersResult
 ) {
-
   if (name === "") {
-    return characters.find((character) => character.name === "Character Not Available")?.id ?? 0;
+    return (
+      characters.find(
+        (character) => character.name === "Character Not Available"
+      )?.id ?? 0
+    );
   }
 
   const normalizedName = name.trim().toLowerCase();
   const character = characters.find((character) => {
     return (
       normalizedName.includes(character.name.toLowerCase()) ||
-      character.altNames.some(
-        (altName) => normalizedName.includes(altName.name.toLowerCase())
+      character.altNames.some((altName) =>
+        normalizedName.includes(altName.name.toLowerCase())
       )
     );
   });
@@ -87,4 +94,23 @@ export function translateCharNameToID(
   }
 
   return character.id;
+}
+
+export function checkPlayerFormat(player: string) {
+  if (player === "") {
+    return "Player Not Available";
+  }
+
+  const playerEdgeCases = [
+    player.includes("Losers Round 1 A"),
+    player.includes("Losers Round 1 B"),
+  ];
+
+  const checkedPlayer = (
+    playerEdgeCases.includes(true) ? lastWord(player) : player
+  )
+    .replace("-", "")
+    .trim();
+
+  return checkedPlayer;
 }

@@ -30,13 +30,13 @@ import { characterLists } from "./characterLists";
   //             { name: "Character Not Available" },
   //             ...arr.map((name) => {
   //               return { name };
-  //             })],
+  //             }),
+  //           ],
   //         },
   //       },
   //     },
   //   });
   // }
-
 
   // // seed alt character names
 
@@ -113,6 +113,7 @@ import { characterLists } from "./characterLists";
   //     data: [
   //       { name: "Virgil", characterId: vergil.id },
   //       { name: "Veril", characterId: vergil.id },
+  //       { name: "Vegril", characterId: vergil.id },
   //     ],
   //   });
   // }
@@ -127,7 +128,7 @@ import { characterLists } from "./characterLists";
   //   await prisma.characterAltName.createMany({
   //     data: [
   //       // { name: "Dormmamu", characterId: dormammu.id },
-  //       { name: "Dormammy", characterId: dormammu.id }
+  //       { name: "Dormammy", characterId: dormammu.id },
   //     ],
   //   });
   // }
@@ -176,9 +177,7 @@ import { characterLists } from "./characterLists";
 
   // if (cViper) {
   //   await prisma.characterAltName.createMany({
-  //     data: [
-  //       { name: "Viper", characterId: cViper.id },
-  //     ],
+  //     data: [{ name: "Viper", characterId: cViper.id }],
   //   });
   // }
 
@@ -206,9 +205,7 @@ import { characterLists } from "./characterLists";
 
   // if (guile) {
   //   await prisma.characterAltName.createMany({
-  //     data: [
-  //       { name: "NuckleDu", characterId: guile.id }
-  //     ],
+  //     data: [{ name: "NuckleDu", characterId: guile.id }],
   //   });
   // }
 
@@ -220,9 +217,7 @@ import { characterLists } from "./characterLists";
 
   // if (cammy) {
   //   await prisma.characterAltName.createMany({
-  //     data: [
-  //       { name: "Punk", characterId: cammy.id }
-  //     ],
+  //     data: [{ name: "Punk", characterId: cammy.id }],
   //   });
   // }
 
@@ -236,6 +231,18 @@ import { characterLists } from "./characterLists";
   // if (jackO) {
   //   await prisma.characterAltName.createMany({
   //     data: [{ name: "Jack-O", characterId: jackO.id }],
+  //   });
+  // }
+
+  // const goldlewis = await prisma.character.findFirst({
+  //   where: {
+  //     name: "Goldlewis",
+  //   },
+  // });
+
+  // if (goldlewis) {
+  //   await prisma.characterAltName.createMany({
+  //     data: [{ name: "Gold Lewis", characterId: goldlewis.id }],
   //   });
   // }
 

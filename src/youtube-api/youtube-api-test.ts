@@ -5,9 +5,7 @@ import { fetchAllVideoData } from "./fetchAllVideoData";
 import { PrismaClient } from "@prisma/client";
 import { extractMatchDataSolo, extractMatchDataTeam } from "./extractMatchData";
 import { getGameForVideo } from "./helperFunctions";
-import {
-  getAllCharacters,
-} from "./prismaWrapperFunctions";
+import { getAllCharacters } from "./prismaWrapperFunctions";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY ?? "";
 
@@ -40,7 +38,10 @@ const prisma = new PrismaClient();
   for (const video of videos) {
     const game = getGameForVideo(games, video);
 
-    if (!game) continue;
+    if (game?.id !== 3) continue;
+
+    // for testing to focus on single videos
+    // if (video.id !== "Sf_j6i4VuY0") continue;
 
     const allGameCharacters = allCharacters.filter((character) => {
       return character.gameId === game.id;

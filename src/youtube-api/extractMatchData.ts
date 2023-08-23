@@ -1,6 +1,6 @@
 import { Game } from "@prisma/client";
 import {
-  lastWord,
+  checkPlayerFormat,
   translateCharNameToID,
   translateTeamCharactersToIDs,
 } from "./helperFunctions";
@@ -19,20 +19,18 @@ export function extractMatchDataSolo(
   gameCharacters: GetCharactersResult
 ): MatchData {
   // filter out irrelevant lines and get last 4 to only include top 8 matches
-  const lines = video.snippet.description
-    .split("\n")
-    .filter(line => {
-      const includesCharacters = gameCharacters.some((character) => line.includes(character.name));
-      return line.includes(" vs") && line.includes("(") && includesCharacters;
-    })
-    .slice(-4);
+  const lines = video.snippet.description.split("\n").filter((line) => {
+    const includesCharacters = gameCharacters.some((character) =>
+      line.includes(character.name)
+    );
+    return line.includes(" vs") && line.includes("(") && includesCharacters;
+  });
 
   const playerCharacters: PlayerCharacter[] = [];
 
   const characterCounts: CharacterCounts = {};
 
   for (const line of lines) {
-
     // removing the first part of the line, AKA the timestamp
     const restOfLine = line.split(" ").slice(1).join(" ");
 
@@ -52,20 +50,22 @@ export function extractMatchDataSolo(
 
       const [player, characterName] = part.split(" (");
 
-      if (!player || !characterName && characterName !== "") {
+      const playerCharUndefinedAndNonEmpty =
+        (!player && player !== "") || (!characterName && characterName !== "");
+
+      if (playerCharUndefinedAndNonEmpty) {
         throw new Error(
           `Invalid part1 in line for ${video.id}\nLine: ${line}\nPart 1: ${part}\nPlayer 1: ${player}\nCharacter 1: ${characterName}`
         );
       }
 
-      const playerEdgeCases = [
-        player.includes("Losers Round 1 A"),
-        player.includes("Losers Round 1 B"),
-      ];
+      const checkedPlayer = checkPlayerFormat(player);
 
-      const checkedPlayer = (playerEdgeCases.includes(true) ? lastWord(player) : player).replace("-", "").trim();
+      const playerAlreadyExists = playerCharacters.some(
+        (obj) => obj.player === checkedPlayer
+      );
 
-      if (playerCharacters.some(obj => obj.player === checkedPlayer)) continue;
+      if (playerAlreadyExists) continue;
 
       const characterId = translateCharNameToID(characterName, gameCharacters);
 
@@ -98,20 +98,18 @@ export function extractMatchDataTeam(
   game: Game,
   gameCharacters: GetCharactersResult
 ): MatchData {
-  const lines = video.snippet.description
-    .split("\n")
-    .filter(line => {
-      const includesCharacters = gameCharacters.some((character) => line.includes(character.name));
-      return line.includes(" vs") && line.includes("(") && includesCharacters;
-    })
-    .slice(-4);
+  const lines = video.snippet.description.split("\n").filter((line) => {
+    const includesCharacters = gameCharacters.some((character) =>
+      line.includes(character.name)
+    );
+    return line.includes(" vs") && line.includes("(") && includesCharacters;
+  });
 
   const playerCharactersTeams: PlayerCharacterTeam[] = [];
 
   const characterCounts: CharacterCounts = {};
 
   for (const line of lines) {
-
     // removing the first part of the line, AKA the timestamp
     const restOfLine = line.split(" ").slice(1).join(" ");
 
@@ -132,32 +130,36 @@ export function extractMatchDataTeam(
       // player 1 stuff -----------------------------------------------------------
       const [player, characterTeam] = part.split(" (");
 
-      if (!player || !characterTeam) {
+      if ((!player && player !== "") || !characterTeam) {
         throw new Error(
           `Invalid part1 in line for ${video.id}\nLine: ${line}\nPart 1: ${part}\nPlayer 1: ${player}\nCharacter 1: ${characterTeam}`
         );
       }
 
-      const playerEdgeCases = [
-        player.includes("Losers Round 1 A"),
-        player.includes("Losers Round 1 B"),
-      ];
+      const checkedPlayer = checkPlayerFormat(player);
 
-      const charsInTeam = translateTeamCharactersToIDs(characterTeam, gameCharacters);
+      const playerAlreadyExists = playerCharactersTeams.some(
+        (obj) => obj.player === checkedPlayer
+      );
+
+      if (playerAlreadyExists) continue;
+
+      const charsInTeam = translateTeamCharactersToIDs(
+        characterTeam,
+        gameCharacters
+      );
 
       for (const characterIdName of Object.values(charsInTeam)) {
         const name = characterIdName.name;
         if (characterCounts.hasOwnProperty(name)) {
           characterCounts[name]!.count++;
         } else {
-          characterCounts[name] = { id: characterIdName.id, count: 1 }
+          characterCounts[name] = { id: characterIdName.id, count: 1 };
         }
       }
 
       const playercharacterTeam = {
-        player: (playerEdgeCases.includes(true) ? lastWord(player) : player)
-          .replace("-", "")
-          .trim(),
+        player: checkedPlayer,
         character1: charsInTeam.character1.id,
         character2: charsInTeam.character2.id,
         character3: charsInTeam.character3.id,
