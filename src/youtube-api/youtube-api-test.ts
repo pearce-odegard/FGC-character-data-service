@@ -38,7 +38,7 @@ const prisma = new PrismaClient();
   for (const video of videos) {
     const game = getGameForVideo(games, video);
 
-    if (game?.id !== 3) continue;
+    if (!game) continue;
 
     // for testing to focus on single videos
     // if (video.id !== "Sf_j6i4VuY0") continue;
@@ -52,11 +52,15 @@ const prisma = new PrismaClient();
     switch (game.isTeamGame) {
       case true:
         const resultTeam = extractMatchDataTeam(video, game, allGameCharacters);
-        console.log(resultTeam);
+        if ((resultTeam.playerCharactersTeams ?? []).length > 8) {
+          console.log(resultTeam);
+        }
         break;
       case false:
         const resultSolo = extractMatchDataSolo(video, game, allGameCharacters);
-        console.log(resultSolo);
+        if (Object.keys(resultSolo.characterCounts).length > 8) {
+          console.log(resultSolo);
+        }
         // console.log(await saveTournamentSolo(prisma, resultSolo));
         break;
       default:
