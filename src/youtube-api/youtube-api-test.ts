@@ -4,7 +4,7 @@ dotenv.config();
 import { fetchAllVideoData } from "./fetchAllVideoData";
 import { PrismaClient } from "@prisma/client";
 import { extractMatchDataSolo, extractMatchDataTeam } from "./extractMatchData";
-import { getGameForVideo } from "./helperFunctions";
+import { createGameCharactersMap, getGameForVideo } from "./helperFunctions";
 import { getAllCharacters } from "./prismaWrapperFunctions";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY ?? "";
@@ -43,16 +43,14 @@ const prisma = new PrismaClient();
     // for testing to focus on single videos
     // if (video.id !== "Sf_j6i4VuY0") continue;
 
-    const allGameCharacters = allCharacters.filter((character) => {
-      return character.gameId === game.id;
-    });
+    const allGameCharacters = createGameCharactersMap(allCharacters, game.id);
 
     console.log(`Video ID: ${video.id}`);
 
     switch (game.isTeamGame) {
       case true:
         const resultTeam = extractMatchDataTeam(video, game, allGameCharacters);
-        if ((resultTeam.playerCharactersTeams ?? []).length > 8) {
+        if ((resultTeam.playerCharacters ?? []).length > 8) {
           console.log(resultTeam);
         }
         break;

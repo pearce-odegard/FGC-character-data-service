@@ -1,11 +1,13 @@
 import { Game } from "@prisma/client";
 import {
   checkPlayerFormat,
+  findRelevantMatchupParagraph,
   translateCharNameToID,
   translateTeamCharactersToIDs,
 } from "./helperFunctions";
 import {
   CharacterCounts,
+  CharacterMap,
   GetCharactersResult,
   MatchData,
   PlayerCharacter,
@@ -16,12 +18,21 @@ import {
 export function extractMatchDataSolo(
   video: VideoObj,
   game: Game,
-  gameCharacters: GetCharactersResult
-): MatchData {
-  // filter out irrelevant lines and get last 4 to only include top 8 matches
-  const lines = video.snippet.description.split("\n").filter((line) => {
-    const includesCharacters = gameCharacters.some((character) =>
-      line.includes(character.name)
+  gameCharacters: CharacterMap<{ id: number; gameId: number }>
+): MatchData<PlayerCharacter> {
+  // find the paragraph before the one with Winners Finals/Grand Finals/etc in it
+  // checking for game.id 3, AKA Guilty Gear Strive, because it has a more consistent issue with having pools and top 48 matches in desc
+  const videoIsStriveAndHasPools =
+    game.id === 3 && video.snippet.title.toLowerCase().includes("pools");
+
+  const relevantParagraph = videoIsStriveAndHasPools
+    ? findRelevantMatchupParagraph(video)
+    : video.snippet.description;
+
+  // filter out irrelevant lines from the paragraph and just check that it's valid
+  const lines = relevantParagraph.split("\n").filter((line) => {
+    const includesCharacters = Object.keys(gameCharacters).some(
+      (characterName) => line.includes(characterName)
     );
     return line.includes(" vs") && line.includes("(") && includesCharacters;
   });
@@ -67,9 +78,15 @@ export function extractMatchDataSolo(
 
       if (playerAlreadyExists) continue;
 
-      const characterId = translateCharNameToID(characterName, gameCharacters);
-
       const trimmedCharName = characterName.trim();
+
+      const characterId = gameCharacters[trimmedCharName]?.id;
+
+      if (!characterId) {
+        throw new Error(
+          `Could not find character with name ${characterName} for game ${game.name}`
+        );
+      }
 
       if (characterCounts.hasOwnProperty(trimmedCharName)) {
         characterCounts[trimmedCharName]!.count++;
@@ -96,15 +113,14 @@ export function extractMatchDataSolo(
 export function extractMatchDataTeam(
   video: VideoObj,
   game: Game,
-  gameCharacters: GetCharactersResult
-): MatchData {
+  gameCharacters: CharacterMap<{ id: number; gameId: number }>
+): MatchData<PlayerCharacterTeam> {
   const lines = video.snippet.description.split("\n").filter((line) => {
-    const includesCharacters = gameCharacters.some((character) =>
-      line.includes(character.name)
+    const includesCharacters = Object.keys(gameCharacters).some(
+      (characterName) => line.includes(characterName)
     );
     return line.includes(" vs") && line.includes("(") && includesCharacters;
   });
-
   const playerCharactersTeams: PlayerCharacterTeam[] = [];
 
   const characterCounts: CharacterCounts = {};
@@ -173,7 +189,7 @@ export function extractMatchDataTeam(
     videoId: video.id,
     gameId: game.id,
     ...video.snippet,
-    playerCharactersTeams,
+    playerCharacters: playerCharactersTeams,
     characterCounts,
   };
 }

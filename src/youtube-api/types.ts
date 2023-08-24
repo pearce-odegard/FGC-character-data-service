@@ -6,6 +6,8 @@ export interface PlayerCharacter {
   character: number;
 }
 
+export type CharacterMap<T> = Record<string, T>;
+
 export interface PlayerCharacterTeam {
   player: string;
   character1: number;
@@ -25,15 +27,14 @@ export interface CharacterCount {
 
 export type CharacterCounts = Record<string, CharacterCount>;
 
-export interface MatchData {
+export interface MatchData<TPlayerCharacter> {
   videoId: string;
   gameId: number;
   title: string;
   channelId: string;
   publishedAt: string;
   description: string;
-  playerCharacters?: PlayerCharacter[];
-  playerCharactersTeams?: PlayerCharacterTeam[];
+  playerCharacters: TPlayerCharacter[];
   characterCounts: CharacterCounts;
 }
 
@@ -61,4 +62,4 @@ export type TeamPartial = {
   character1: number;
   character2: number;
   character3: number;
-}
+};

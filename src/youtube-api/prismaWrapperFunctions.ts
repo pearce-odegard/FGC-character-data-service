@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { MatchData } from "./types";
+import { CharacterMap, MatchData, PlayerCharacter } from "./types";
 
 export async function getAllCharacters(prisma: PrismaClient) {
   const characters = await prisma.character.findMany({
@@ -106,7 +106,7 @@ export async function getGameByName(prisma: PrismaClient, name: string) {
 
 export async function saveTournamentSolo(
   prisma: PrismaClient,
-  matchData: MatchData
+  matchData: MatchData<PlayerCharacter>
 ) {
   const url = `https://www.youtube.com/watch?v=${matchData.videoId}`;
 

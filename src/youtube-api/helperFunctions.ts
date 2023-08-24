@@ -1,5 +1,10 @@
 import { Game } from "@prisma/client";
-import { CharacterIdName, GetCharactersResult, VideoObj } from "./types";
+import {
+  CharacterIdName,
+  CharacterMap,
+  GetCharactersResult,
+  VideoObj,
+} from "./types";
 
 export function getGameForVideo(games: Game[], video: VideoObj): Game | null {
   const title = video.snippet.title.toLowerCase();
@@ -37,22 +42,18 @@ export function lastWord(inputString: string) {
 
 export function translateTeamCharactersToIDs(
   teamString: string,
-  allCharacters: GetCharactersResult
+  allCharacters: CharacterMap<{ id: number; gameId: number }>
 ) {
   const characters: CharacterIdName[] = [];
 
   const normalizedTeamString = teamString.trim().toLowerCase();
 
-  for (const character of allCharacters) {
-    const altNames = character.altNames.map((altName) =>
-      altName.name.toLowerCase()
-    );
-    const normalizedName = character.name.toLowerCase();
-    if (
-      normalizedTeamString.includes(normalizedName) ||
-      altNames.some((altName) => normalizedTeamString.includes(altName))
-    ) {
-      characters.push({ name: character.name, id: character.id });
+  for (const characterName of Object.keys(allCharacters)) {
+    if (normalizedTeamString.includes(characterName.toLowerCase())) {
+      characters.push({
+        name: characterName,
+        id: allCharacters[characterName]!.id,
+      });
     }
   }
 
@@ -113,4 +114,51 @@ export function checkPlayerFormat(player: string) {
     .trim();
 
   return checkedPlayer;
+}
+
+// an attempt at isolating top 8 matches in descriptions with pools and top 48 as well
+export function findRelevantMatchupParagraph(video: VideoObj) {
+  const paragraphs = video.snippet.description.split("\n\n");
+
+  // Keywords to search for
+  const searchKeywords = [
+    "Winners Final",
+    "Losers Semifinal",
+    "Losers Final",
+    "Grand Final",
+  ];
+
+  const index = paragraphs.findIndex((paragraph) =>
+    searchKeywords.some((keyword) => paragraph.includes(keyword))
+  );
+
+  // Return the index of the paragraph before the one with the keyword
+  const relevantParagraph = paragraphs[index - 1]
+    ? paragraphs[index - 1]
+    : paragraphs[index];
+
+  if (!relevantParagraph) {
+    return "";
+  }
+
+  return relevantParagraph;
+}
+
+export function createGameCharactersMap(
+  characters: GetCharactersResult,
+  gameId: number
+) {
+  const characterMap = characters.reduce((map, character) => {
+    // Add character name to the map
+    map[character.name] = { id: character.id, gameId: character.gameId };
+
+    // Add altNames to the map
+    character.altNames.forEach((altName) => {
+      map[altName.name] = { id: character.id, gameId: character.gameId };
+    });
+
+    return map;
+  }, {} as CharacterMap<{ id: number; gameId: number }>);
+
+  return characterMap;
 }
